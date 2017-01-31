@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class User {
 
+	// created using http://www.jsonschema2pojo.org/
 	@SerializedName("name")
 	@Expose
 	private String name;
@@ -15,7 +16,7 @@ public class User {
 	
 	@SerializedName("image")
 	@Expose
-	private List<Image> image = null;
+	private List<UserImage> image = null;
 	
 	@SerializedName("url")
 	@Expose
@@ -73,11 +74,11 @@ public class User {
 		this.realname = realname;
 	}
 
-	public List<Image> getImage() {
+	public List<UserImage> getImage() {
 		return image;
 	}
 
-	public void setImage(List<Image> image) {
+	public void setImage(List<UserImage> image) {
 		this.image = image;
 	}
 

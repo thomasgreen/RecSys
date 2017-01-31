@@ -3,6 +3,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Registered {
+	
+	// created using http://www.jsonschema2pojo.org/
 
 	@SerializedName("#text")
 	@Expose

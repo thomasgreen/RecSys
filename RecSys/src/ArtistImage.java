@@ -1,7 +1,7 @@
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Image {
+public class ArtistImage {
 
 	@SerializedName("#text")
 	@Expose

@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class GetData {
+public class Main {
 
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
 	static Gson gson = new Gson();
@@ -22,10 +22,7 @@ public class GetData {
 			
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
 		
-		//String firstline = reader.readLine();
-		
-		//System.out.println(firstline);
-		
+			
 		UserInfo userinfo = gson.fromJson(reader, UserInfo.class);
 		
 		if(userinfo != null){
@@ -57,9 +54,14 @@ public class GetData {
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
 		
-		String firstline = reader.readLine();
+				
+		GetTopArtists gettopartists = gson.fromJson(reader, GetTopArtists.class);
 		
-		System.out.println(firstline);
+		if(gettopartists != null){
+			
+			System.out.println("Rank " + gettopartists.getTopartists().getArtist().get(0).getAttr().getRank() + ": " +  gettopartists.getTopartists().getArtist().get(0).getName() + "\n");
+		}
+		
 		
 	}
 
@@ -69,9 +71,9 @@ public class GetData {
 	
 
 	public static void main(String [ ] args) throws IOException{
-		getUserInfo();
+		//getUserInfo();
 		
-		
+		getUserTopTracks();
 	}
 
 }
