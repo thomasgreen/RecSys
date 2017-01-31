@@ -1,15 +1,17 @@
 import java.io.BufferedReader;
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
 public class GetData {
 
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
+	static Gson gson = new Gson();
 	
 	public static void getUserInfo() throws IOException {
 		
@@ -20,9 +22,16 @@ public class GetData {
 			
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
 		
-		String firstline = reader.readLine();
+		//String firstline = reader.readLine();
 		
-		System.out.println(firstline);
+		//System.out.println(firstline);
+		
+		UserInfo userinfo = gson.fromJson(reader, UserInfo.class);
+		
+		if(userinfo != null){
+			
+			System.out.println("User Name: " + userinfo.getUser().getName() + "\nURL: " + userinfo.getUser().getUrl());
+		}
 		
 	}
 	
@@ -53,11 +62,14 @@ public class GetData {
 		System.out.println(firstline);
 		
 	}
+
+	
+	
 	
 	
 
 	public static void main(String [ ] args) throws IOException{
-		getUserTopTracks();
+		getUserInfo();
 		
 		
 	}
