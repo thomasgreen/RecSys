@@ -1,7 +1,7 @@
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ArtistImage {
+public class Image {
 
 	@SerializedName("#text")
 	@Expose
@@ -19,12 +19,22 @@ public class ArtistImage {
 		this.text = text;
 	}
 
+	public Image withText(String text) {
+		this.text = text;
+		return this;
+	}
+
 	public String getSize() {
 		return size;
 	}
 
 	public void setSize(String size) {
 		this.size = size;
+	}
+
+	public Image withSize(String size) {
+		this.size = size;
+		return this;
 	}
 
 }

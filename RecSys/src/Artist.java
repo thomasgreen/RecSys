@@ -26,7 +26,7 @@ public class Artist {
 	
 	@SerializedName("image")
 	@Expose
-	private List<ArtistImage> image = null;
+	private List<Image> image = null;
 	
 	@SerializedName("@attr")
 	@Expose
@@ -40,12 +40,22 @@ public class Artist {
 		this.name = name;
 	}
 
+	public Artist withName(String name) {
+		this.name = name;
+		return this;
+	}
+
 	public String getPlaycount() {
 		return playcount;
 	}
 
 	public void setPlaycount(String playcount) {
 		this.playcount = playcount;
+	}
+
+	public Artist withPlaycount(String playcount) {
+		this.playcount = playcount;
+		return this;
 	}
 
 	public String getMbid() {
@@ -56,12 +66,22 @@ public class Artist {
 		this.mbid = mbid;
 	}
 
+	public Artist withMbid(String mbid) {
+		this.mbid = mbid;
+		return this;
+	}
+
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public Artist withUrl(String url) {
+		this.url = url;
+		return this;
 	}
 
 	public String getStreamable() {
@@ -72,12 +92,22 @@ public class Artist {
 		this.streamable = streamable;
 	}
 
-	public List<ArtistImage> getImage() {
+	public Artist withStreamable(String streamable) {
+		this.streamable = streamable;
+		return this;
+	}
+
+	public List<Image> getImage() {
 		return image;
 	}
 
-	public void setImage(List<ArtistImage> image) {
+	public void setImage(List<Image> image) {
 		this.image = image;
+	}
+
+	public Artist withImage(List<Image> image) {
+		this.image = image;
+		return this;
 	}
 
 	public Attr getAttr() {
@@ -86,6 +116,11 @@ public class Artist {
 
 	public void setAttr(Attr attr) {
 		this.attr = attr;
+	}
+
+	public Artist withAttr(Attr attr) {
+		this.attr = attr;
+		return this;
 	}
 
 }

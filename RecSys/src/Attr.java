@@ -15,4 +15,9 @@ public class Attr {
 		this.rank = rank;
 	}
 
+	public Attr withRank(String rank) {
+		this.rank = rank;
+		return this;
+	}
+
 }

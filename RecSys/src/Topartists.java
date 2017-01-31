@@ -7,7 +7,6 @@ public class Topartists {
 	@SerializedName("artist")
 	@Expose
 	private List<Artist> artist = null;
-	
 	@SerializedName("@attr")
 	@Expose
 	private Attr_ attr;
@@ -20,12 +19,22 @@ public class Topartists {
 		this.artist = artist;
 	}
 
+	public Topartists withArtist(List<Artist> artist) {
+		this.artist = artist;
+		return this;
+	}
+
 	public Attr_ getAttr() {
 		return attr;
 	}
 
 	public void setAttr(Attr_ attr) {
 		this.attr = attr;
+	}
+
+	public Topartists withAttr(Attr_ attr) {
+		this.attr = attr;
+		return this;
 	}
 
 }

@@ -31,12 +31,22 @@ public class Attr_ {
 		this.user = user;
 	}
 
+	public Attr_ withUser(String user) {
+		this.user = user;
+		return this;
+	}
+
 	public String getPage() {
 		return page;
 	}
 
 	public void setPage(String page) {
 		this.page = page;
+	}
+
+	public Attr_ withPage(String page) {
+		this.page = page;
+		return this;
 	}
 
 	public String getPerPage() {
@@ -47,6 +57,11 @@ public class Attr_ {
 		this.perPage = perPage;
 	}
 
+	public Attr_ withPerPage(String perPage) {
+		this.perPage = perPage;
+		return this;
+	}
+
 	public String getTotalPages() {
 		return totalPages;
 	}
@@ -55,12 +70,22 @@ public class Attr_ {
 		this.totalPages = totalPages;
 	}
 
+	public Attr_ withTotalPages(String totalPages) {
+		this.totalPages = totalPages;
+		return this;
+	}
+
 	public String getTotal() {
 		return total;
 	}
 
 	public void setTotal(String total) {
 		this.total = total;
+	}
+
+	public Attr_ withTotal(String total) {
+		this.total = total;
+		return this;
 	}
 
 }
