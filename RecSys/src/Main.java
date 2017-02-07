@@ -1,12 +1,24 @@
 import java.io.BufferedReader;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
+import FriendsPOJO.Friends;
+import FriendsPOJO.GetFriends;
+import UserPOJO.User;
+import UserPOJO.UserInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -41,25 +53,35 @@ public class Main {
 	}
 	
 	
-	public static void getUserTopTracks(String username) throws IOException {
+	public static void getUserFriends(String username) throws IOException{
 		
-		URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&" +
-		"user=" + username +
-		"&api_key=" + API_KEY + 
-		"&format=json");
+		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.getfriends&" +
+				"user=" + username + 
+				"&api_key=" + API_KEY + 
+				"&format=json");
 		
 		final InputStream inputstream = APISend(reqURL);
-		
+			
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
 		
-				
-		TopArtistsSchema topartistsschema = gson.fromJson(reader, TopArtistsSchema.class);
 		
-		if(topartistsschema != null){
-			
-			System.out.println("Rank " + topartistsschema.getTopartists().getArtist().get(0).getAttr().getRank() + ": " +  topartistsschema.getTopartists().getArtist().get(0).getName() + "\n");
-		}
-			
+		GetFriends getfriends = gson.fromJson(reader, GetFriends.class);
+		
+		System.out.println(getfriends.getFriends().getUser().get(0).getName());
+		
+		
+		
+		//ATTEMPTS TO USE TYPETOKEN - DOES NOT WORK
+		//Type listType = new TypeToken<List<User>>(){}.getType();
+		//List<User> yourClassList = new Gson().fromJson(reader, listType);
+		//String name = yourClassList.get(0).getName();
+		//System.out.println(name);
+		
+		
+		
+		
+		
+		
 	}
 
 	
@@ -68,7 +90,8 @@ public class Main {
 		
 		getUserInfo(username);
 		
-		getUserTopTracks(username);
+		getUserFriends(username);
+		
 	}
 
 	private static void getUserID() {
