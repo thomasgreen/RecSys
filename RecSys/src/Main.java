@@ -1,4 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -18,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -89,7 +94,25 @@ public class Main {
 		
 		for(int i=0; i<friendsTotal; i++){
 			System.out.println(getfriends.getFriends().getUser().get(i).getName());
-       }
+        }
+		
+		
+		//saving usernames to files
+		
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter("rsc/test1.txt", true));
+		
+	
+		for(int i=0; i<friendsTotal; i++){
+			writer.write(getfriends.getFriends().getUser().get(i).getName());
+			writer.newLine();
+        }
+		
+		
+		
+		
+		writer.flush();
+		writer.close();
 		
 	
 		
@@ -104,7 +127,12 @@ public class Main {
 		
 		getUserFriends(username);
 		
+		
+		
 	}
+
+	
+
 
 	private static void getUserID() {
 		Scanner in = new Scanner(System.in);
