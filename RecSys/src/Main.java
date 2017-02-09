@@ -1,8 +1,13 @@
 import java.io.BufferedReader;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 
 import FriendsPOJO.Friends;
 import FriendsPOJO.GetFriends;
@@ -20,12 +25,14 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import org.json.*;
 
 public class Main {
 
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
 	static Gson gson = new Gson();
 	private static String username;
+	
 	
 	public static void getUserInfo(String username) throws IOException {
 		
@@ -55,6 +62,7 @@ public class Main {
 	
 	public static void getUserFriends(String username) throws IOException{
 		
+		
 		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.getfriends&" +
 				"user=" + username + 
 				"&api_key=" + API_KEY + 
@@ -67,19 +75,23 @@ public class Main {
 		
 		GetFriends getfriends = gson.fromJson(reader, GetFriends.class);
 		
-		System.out.println(getfriends.getFriends().getUser().get(0).getName());
 		
 		
 		
-		//ATTEMPTS TO USE TYPETOKEN - DOES NOT WORK
-		//Type listType = new TypeToken<List<User>>(){}.getType();
-		//List<User> yourClassList = new Gson().fromJson(reader, listType);
-		//String name = yourClassList.get(0).getName();
-		//System.out.println(name);
+		System.out.println("\nList of Friends: ");
+		
+		
+		//System.out.println(getfriends.getFriends().getUser().get(0).getName());
 		
 		
 		
+		int friendsTotal = getfriends.getFriends().getUser().size();
 		
+		for(int i=0; i<friendsTotal; i++){
+			System.out.println(getfriends.getFriends().getUser().get(i).getName());
+       }
+		
+	
 		
 		
 	}
