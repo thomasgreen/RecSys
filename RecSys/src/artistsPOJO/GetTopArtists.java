@@ -6,16 +6,16 @@ import com.google.gson.annotations.SerializedName;
 
 public class GetTopArtists {
 
-@SerializedName("topartists")
-@Expose
-private Topartists topartists;
+	@SerializedName("topartists")
+	@Expose
+	private Topartists topartists;
 
-public Topartists getTopartists() {
-return topartists;
-}
+	public Topartists getTopartists() {
+		return topartists;
+	}
 
-public void setTopartists(Topartists topartists) {
-this.topartists = topartists;
-}
+	public void setTopartists(Topartists topartists) {
+		this.topartists = topartists;
+	}
 
 }

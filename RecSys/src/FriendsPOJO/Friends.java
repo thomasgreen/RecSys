@@ -1,10 +1,10 @@
 package FriendsPOJO;
-
+import UserPOJO.User;
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import UserPOJO.User;
+
 
 public class Friends {
 
