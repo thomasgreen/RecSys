@@ -5,11 +5,13 @@ import java.io.FileWriter;
 import com.google.gson.Gson;
 import FriendsPOJO.GetFriends;
 import UserPOJO.UserInfo;
+import artistsPOJO.GetTopArtists;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
@@ -105,7 +107,47 @@ public class Main {
 		}
 
 	}
+	
+	
+	public static void getUserTopArtists(String username) throws IOException{
+		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&" + "user=" + username +
+				"&api_key=" + API_KEY + 
+				"&limit= 100 &format=json");
+		
+		
+		final InputStream inputstream = APISend(reqURL);
 
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
+		
+		
+		
+		//String test = reader.readLine();
+
+		GetTopArtists getartists = gson.fromJson(reader, GetTopArtists.class);
+		
+
+		for(int i = 0; i < 50; i++){
+			
+			System.out.println(getartists.getTopartists().getArtist().get(i).getName());
+		}
+		
+		//writer.write(test);
+		//writer.close();
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter("rsc/jsontest5.txt", true));
+		gson.toJson(getartists.getTopartists(), writer);
+		
+		writer.close();
+		
+		
+		
+		
+	}
+
+	
+	
+	
+	
 	public static void main(String[] args) throws IOException {
 		while (true) {
 
@@ -113,7 +155,10 @@ public class Main {
 
 			getUserInfo(username);
 
-			getUserFriends(username);
+			//getUserFriends(username);
+			getUserTopArtists(username);
+			
+			
 		}
 
 	}
