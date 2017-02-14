@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import FriendsPOJO.GetFriends;
 import UserPOJO.UserInfo;
 import artistsPOJO.GetTopArtists;
@@ -14,16 +16,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
 	static Gson gson = new Gson();
-	private static String username;
 
 	public static void getUserInfo(String username) throws IOException {
 
@@ -55,47 +59,41 @@ public class Main {
 
 		GetFriends getfriends = gson.fromJson(reader, GetFriends.class);
 
-		// if(getfriends.getFriends() == null) throw new
-		// IllegalArgumentException();
+		try { // try if user has friends
 
-		System.out.println("\nList of Friends: ");
-
-		try {
 			int friendsTotal = getfriends.getFriends().getUser().size();
 
 			// saving usernames to files
 
-			BufferedWriter writer = new BufferedWriter(new FileWriter("rsc/test1.txt", true));
-
 			for (int i = 0; i < friendsTotal; i++) {
+				BufferedWriter writer = new BufferedWriter(new FileWriter("rsc/usernames.txt", true));
+				BufferedReader freader = new BufferedReader(new FileReader("rsc/usernames.txt"));
 				String userToAdd = getfriends.getFriends().getUser().get(i).getName();
 
-				Scanner filescanner = new Scanner("rsc.test1.txt");
+				boolean hasDuplicate = false;
+				String line;
 
-				while (filescanner.hasNextLine()) {
-					if (userToAdd.equals(filescanner.nextLine().trim())) {
-						// found
-						break;
-					} else {
-						// not found
-						writer.write(getfriends.getFriends().getUser().get(i).getName());
-						writer.newLine();
+				while ((line = freader.readLine()) != null && !hasDuplicate) {
 
+					if (line.equals(userToAdd)) {
+						hasDuplicate = true;
 					}
 
 				}
 
-				// writer.write(getfriends.getFriends().getUser().get(i).getName());
-				// writer.newLine();
+				if (!hasDuplicate) {
+					writer.newLine();
+					System.out.println(userToAdd);
+					writer.write(userToAdd);
+					writer.flush();
+					writer.close();
 
-				filescanner.close();
+				}
+				freader.close();
 
 			}
 
-			writer.flush();
-			writer.close();
-
-		} catch (NullPointerException e) {
+		} catch (NullPointerException e) { // if no friends are found
 			// TODO Auto-generated catch block
 			System.out.println("This user does not follow any accounts.");
 			// e.printStackTrace();
@@ -105,7 +103,7 @@ public class Main {
 
 	public static void getUserTopArtists(String username) throws IOException {
 		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&" + "user=" + username
-				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
+				+ "&api_key=" + API_KEY + "&limit= 50 &format=json");
 
 		final InputStream inputstream = APISend(reqURL);
 
@@ -121,10 +119,10 @@ public class Main {
 			System.out.println(getartists.getTopartists().getArtist().get(i).getName());
 		}
 
-		File file = new File("rsc/jsontest6.json");
+		File file = new File("rsc/jsontest7.json");
 
 		if (file.exists()) {// if there is already 1 element in the file
-			Scanner sc = new Scanner(new File("rsc/jsontest6.json"));
+			Scanner sc = new Scanner(new File("rsc/jsontest7.json"));
 
 			String currentdata = "";
 
@@ -165,43 +163,65 @@ public class Main {
 		}
 
 	}
-	
-	public static void jsontest(){
-		
+
+	public static void jsontest() {
+
 		Gson gson = new Gson();
 
-		
-		
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new FileReader(new File("rsc/jsontest6.json")));
+			reader = new BufferedReader(new FileReader(new File("rsc/jsontest7.json")));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("That File Does Not Exist");
 			e.printStackTrace();
 		}
-		
-		
-		//TopArtistsList getartists = gson.fromJson(reader, TopArtistsList.class);
-		
-		
-		
-		//System.out.println(getartists.GetTopArtistsSchema().get(0).getTopartists().getArtist().get(0).getName());
-		
-		
+
+		// TopArtistsList getartists = gson.fromJson(reader,
+		// TopArtistsList.class);
+
+		List<GetTopArtists> logs = null;
+
+		logs = gson.fromJson(reader, new TypeToken<List<GetTopArtists>>() {
+		}.getType());
+
+		String result = logs.get(0).getTopartists().getArtist().get(0).getName();
+
+		// System.out.println(getartists.GetTopArtistsSchema().get(0).getTopartists().getArtist().get(0).getName());
+
+		System.out.println(result);
+
+	}
+
+	public static List<String> getUsersFriendsFromFile() throws IOException {
+
+		BufferedReader reader = new BufferedReader(new FileReader("rsc/usernames.txt"));
+
+		List<String> usernamesOnFile = new ArrayList<String>();
+		String currentline;
+
+		while ((currentline = reader.readLine()) != null) {
+			usernamesOnFile.add(currentline);
+
+		}
+
+		reader.close();
+
+		return usernamesOnFile;
+
 	}
 
 	public static void main(String[] args) throws IOException {
+
 		while (true) {
 
-			getUserID();
+			// getUserInfo(username);
 
-			getUserInfo(username);
+			int usersonfileno = getUsersFriendsFromFile().size();
+			for (int i = 0; i < usersonfileno; i++) {
+				getUserTopArtists(getUsersFriendsFromFile().get(i));
+			}
 
-			 getUserFriends(username);
-			getUserTopArtists(username);
-			
-			//jsontest();
 		}
 
 	}
@@ -211,7 +231,7 @@ public class Main {
 
 		System.out.println("Please Enter Your Last.FM Username: ");
 
-		username = in.nextLine();
+		String username = in.nextLine();
 
 		// in.close();
 
