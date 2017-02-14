@@ -103,7 +103,7 @@ public class Main {
 
 	public static void getUserTopArtists(String username) throws IOException {
 		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&" + "user=" + username
-				+ "&api_key=" + API_KEY + "&limit= 50 &format=json");
+				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
 
 		final InputStream inputstream = APISend(reqURL);
 
@@ -114,15 +114,12 @@ public class Main {
 		GetTopArtists getartists = gson.fromJson(reader, GetTopArtists.class);
 
 		reader.close();
-		for (int i = 0; i < 50; i++) {
+		
 
-			System.out.println(getartists.getTopartists().getArtist().get(i).getName());
-		}
-
-		File file = new File("rsc/jsontest7.json");
+		File file = new File("rsc/topartists.json");
 
 		if (file.exists()) {// if there is already 1 element in the file
-			Scanner sc = new Scanner(new File("rsc/jsontest7.json"));
+			Scanner sc = new Scanner(new File("rsc/topartists.json"));
 
 			String currentdata = "";
 
