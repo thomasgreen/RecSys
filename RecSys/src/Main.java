@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -94,7 +92,6 @@ public class Main {
 			}
 
 		} catch (NullPointerException e) { // if no friends are found
-			// TODO Auto-generated catch block
 			System.out.println("This user does not follow any accounts.");
 			// e.printStackTrace();
 		}
@@ -103,6 +100,65 @@ public class Main {
 
 	public static void getUserTopArtists(String username) throws IOException {
 		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&" + "user=" + username
+				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
+
+		final InputStream inputstream = APISend(reqURL);
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
+
+		// String test = reader.readLine();
+
+		GetTopArtists getartists = gson.fromJson(reader, GetTopArtists.class);
+
+		reader.close();
+
+		File file = new File("rsc/topartists.json");
+
+		if (file.exists()) {// if there is already 1 element in the file
+			Scanner sc = new Scanner(new File("rsc/topartists.json"));
+
+			String currentdata = "";
+
+			while (sc.hasNextLine()) {
+				currentdata = sc.nextLine();
+				System.out.println();
+
+			}
+
+			FileWriter fw = new FileWriter(file, false);
+
+			currentdata = currentdata.substring(0, (currentdata.length() - 1));
+
+			currentdata += ","; // append comma
+
+			currentdata += gson.toJson(getartists.getTopartists());
+
+			currentdata += "]"; // close bracket
+
+			fw.write("");
+
+			fw.write(currentdata);
+			fw.flush();
+			fw.close();
+			sc.close();
+
+		} else { // if this is the first json added
+			FileWriter fw = new FileWriter(file);
+			// start bracket
+			// add json
+			// close bracket
+			String data = "[" + gson.toJson(getartists.getTopartists()) + "]";
+
+			fw.write(data);
+			fw.flush();
+			fw.close();
+
+		}
+
+	}
+
+	public static void getUserTopTracks(String username) throws IOException {
+		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&" + "user=" + username
 				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
 
 		final InputStream inputstream = APISend(reqURL);
@@ -160,7 +216,7 @@ public class Main {
 		}
 
 	}
-
+	
 	public static void jsontest() {
 
 		Gson gson = new Gson();
@@ -169,7 +225,6 @@ public class Main {
 		try {
 			reader = new BufferedReader(new FileReader(new File("rsc/jsontest7.json")));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			System.out.println("That File Does Not Exist");
 			e.printStackTrace();
 		}
