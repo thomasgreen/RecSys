@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import FriendsPOJO.GetFriends;
 import UserPOJO.UserInfo;
 import artistsPOJO.GetTopArtists;
+import artistsPOJO.Topartists;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,10 +20,12 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+import java.lang.reflect.Type;
 
-public class Main {
+public class DataCollection {
 
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
 	static Gson gson = new Gson();
@@ -98,81 +101,23 @@ public class Main {
 
 	}
 
-	public static void getUserTopArtists(String username) throws IOException {
+	public static void getUserTopArtists(String username, int no) throws IOException {
 		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&" + "user=" + username
 				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
 
 		final InputStream inputstream = APISend(reqURL);
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
-
-		// String test = reader.readLine();
-
-		GetTopArtists getartists = gson.fromJson(reader, GetTopArtists.class);
-
-		reader.close();
-
-		File file = new File("rsc/topartists.json");
-
-		if (file.exists()) {// if there is already 1 element in the file
-			Scanner sc = new Scanner(new File("rsc/topartists.json"));
-
-			String currentdata = "";
-
-			while (sc.hasNextLine()) {
-				currentdata = sc.nextLine();
-				System.out.println();
-
-			}
-
-			FileWriter fw = new FileWriter(file, false);
-
-			currentdata = currentdata.substring(0, (currentdata.length() - 1));
-
-			currentdata += ","; // append comma
-
-			currentdata += gson.toJson(getartists.getTopartists());
-
-			currentdata += "]"; // close bracket
-
-			fw.write("");
-
-			fw.write(currentdata);
-			fw.flush();
-			fw.close();
-			sc.close();
-
-		} else { // if this is the first json added
-			FileWriter fw = new FileWriter(file);
-			// start bracket
-			// add json
-			// close bracket
-			String data = "[" + gson.toJson(getartists.getTopartists()) + "]";
-
-			fw.write(data);
-			fw.flush();
-			fw.close();
-
-		}
-
-	}
-
-	public static void getUserTopTracks(String username) throws IOException {
-		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&" + "user=" + username
-				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
-
-		final InputStream inputstream = APISend(reqURL);
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
-
-		// String test = reader.readLine();
-
-		GetTopArtists getartists = gson.fromJson(reader, GetTopArtists.class);
-
-		reader.close();
 		
 
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
+
+		// String test = reader.readLine();
+
+		GetTopArtists getartists = gson.fromJson(reader, GetTopArtists.class);
+
+		reader.close();
+
 		File file = new File("rsc/topartists.json");
+		int userno = no;
 
 		if (file.exists()) {// if there is already 1 element in the file
 			Scanner sc = new Scanner(new File("rsc/topartists.json"));
@@ -187,11 +132,11 @@ public class Main {
 
 			FileWriter fw = new FileWriter(file, false);
 
-			currentdata = currentdata.substring(0, (currentdata.length() - 1));
+			currentdata = currentdata.substring(0, (currentdata.length() - 2));
 
 			currentdata += ","; // append comma
 
-			currentdata += gson.toJson(getartists.getTopartists());
+			currentdata = currentdata + "" + gson.toJson(getartists.getTopartists());
 
 			currentdata += "]"; // close bracket
 
@@ -207,7 +152,7 @@ public class Main {
 			// start bracket
 			// add json
 			// close bracket
-			String data = "[" + gson.toJson(getartists.getTopartists()) + "]";
+			String data = "[" + gson.toJson(getartists.getTopartists()) + " ]";
 
 			fw.write(data);
 			fw.flush();
@@ -216,36 +161,46 @@ public class Main {
 		}
 
 	}
+
 	
-	public static void jsontest() {
+	public static void ratingtest() {
 
 		Gson gson = new Gson();
 
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new FileReader(new File("rsc/jsontest7.json")));
+			reader = new BufferedReader(new FileReader(new File("rsc/topartists.json")));
 		} catch (FileNotFoundException e) {
 			System.out.println("That File Does Not Exist");
 			e.printStackTrace();
 		}
 
-		// TopArtistsList getartists = gson.fromJson(reader,
-		// TopArtistsList.class);
+		Type collectionType = new TypeToken<List<Topartists>>(){}.getType();
+		List<Topartists> tal = gson.fromJson(reader, collectionType);
+				
+		
 
-		List<GetTopArtists> logs = null;
-
-		logs = gson.fromJson(reader, new TypeToken<List<GetTopArtists>>() {
-		}.getType());
-
-		String result = logs.get(0).getTopartists().getArtist().get(0).getName();
-
-		// System.out.println(getartists.GetTopArtistsSchema().get(0).getTopartists().getArtist().get(0).getName());
-
-		System.out.println(result);
+		
+		String topsong = tal.get(1).getArtist().get(0).getName();
+		String user = tal.get(1).getAttr().getUser();
+		System.out.println(user + " " + topsong);
+				
+		
+		
+		long rank = Integer.parseInt(tal.get(0).getArtist().get(56).getAttr().getRank());
+		
+		long total = tal.get(0).getArtist().size();
+		
+		float rating = rank/total;
+		
+		long finalrating = (long) (5 * (1 - rating)); // rating of the user
+	
+		System.out.println(finalrating);
+		
 
 	}
 
-	public static List<String> getUsersFriendsFromFile() throws IOException {
+	public static List<String> getUsersFromFile() throws IOException {
 
 		BufferedReader reader = new BufferedReader(new FileReader("rsc/usernames.txt"));
 
@@ -265,25 +220,18 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 
-		while (true) {
-
-			// getUserInfo(username);
-
-			int usersonfileno = getUsersFriendsFromFile().size();
-			for (int i = 0; i < usersonfileno; i++) {
-				getUserTopArtists(getUsersFriendsFromFile().get(i));
-			}
-
-		}
-
 	}
+	
+	
 
-	private static void getUserID() {
+	//public static void generateRating
+
+	private static String getUserID() {
 		Scanner in = new Scanner(System.in);
 
 		System.out.println("Please Enter Your Last.FM Username: ");
 
-		String username = in.nextLine();
+		return in.nextLine();
 
 		// in.close();
 
