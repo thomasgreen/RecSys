@@ -20,11 +20,15 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 import java.lang.reflect.Type;
 
+/**
+ * @author thomasgreen Used for collecting the usernames and favourite artists
+ *         of the users found. Archieve Code, Recommendations made in the more
+ *         appropriate class
+ */
 public class DataCollection {
 
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
@@ -106,7 +110,6 @@ public class DataCollection {
 				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
 
 		final InputStream inputstream = APISend(reqURL);
-		
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
 
@@ -117,7 +120,6 @@ public class DataCollection {
 		reader.close();
 
 		File file = new File("rsc/topartists.json");
-		int userno = no;
 
 		if (file.exists()) {// if there is already 1 element in the file
 			Scanner sc = new Scanner(new File("rsc/topartists.json"));
@@ -162,7 +164,6 @@ public class DataCollection {
 
 	}
 
-	
 	public static void ratingtest() {
 
 		Gson gson = new Gson();
@@ -175,28 +176,23 @@ public class DataCollection {
 			e.printStackTrace();
 		}
 
-		Type collectionType = new TypeToken<List<Topartists>>(){}.getType();
+		Type collectionType = new TypeToken<List<Topartists>>() {
+		}.getType();
 		List<Topartists> tal = gson.fromJson(reader, collectionType);
-				
-		
 
-		
 		String topsong = tal.get(1).getArtist().get(0).getName();
 		String user = tal.get(1).getAttr().getUser();
 		System.out.println(user + " " + topsong);
-				
-		
-		
+
 		long rank = Integer.parseInt(tal.get(0).getArtist().get(56).getAttr().getRank());
-		
+
 		long total = tal.get(0).getArtist().size();
-		
-		float rating = rank/total;
-		
+
+		float rating = rank / total;
+
 		long finalrating = (long) (5 * (1 - rating)); // rating of the user
-	
+
 		System.out.println(finalrating);
-		
 
 	}
 
@@ -221,12 +217,12 @@ public class DataCollection {
 	public static void main(String[] args) throws IOException {
 
 	}
-	
-	
 
-	//public static void generateRating
+	// public static void generateRating
 
+	@SuppressWarnings("unused")
 	private static String getUserID() {
+		@SuppressWarnings("resource")
 		Scanner in = new Scanner(System.in);
 
 		System.out.println("Please Enter Your Last.FM Username: ");
