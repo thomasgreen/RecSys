@@ -1,17 +1,14 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import FriendsPOJO.GetFriends;
 import UserPOJO.UserInfo;
 import artistsPOJO.GetTopArtists;
-import artistsPOJO.Topartists;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +19,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.lang.reflect.Type;
 
 /**
  * @author thomasgreen Used for collecting the usernames and favourite artists
@@ -33,6 +29,18 @@ public class DataCollection {
 
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
 	static Gson gson = new Gson();
+
+	public static void main(String[] args) throws IOException {
+
+		List<String> users = getUsersFromFile();
+
+		for (int i = 0; i < 1000; i++) {
+			getUserTopArtists(users.get(i));
+			System.out.println(i);
+		}
+
+		System.out.println("DONE");
+	}
 
 	public static void getUserInfo(String username) throws IOException {
 
@@ -105,7 +113,7 @@ public class DataCollection {
 
 	}
 
-	public static void getUserTopArtists(String username, int no) throws IOException {
+	public static void getUserTopArtists(String username) throws IOException {
 		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&" + "user=" + username
 				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
 
@@ -134,7 +142,7 @@ public class DataCollection {
 
 			FileWriter fw = new FileWriter(file, false);
 
-			currentdata = currentdata.substring(0, (currentdata.length() - 2));
+			currentdata = currentdata.substring(0, (currentdata.length() - 1));
 
 			currentdata += ","; // append comma
 
@@ -154,45 +162,13 @@ public class DataCollection {
 			// start bracket
 			// add json
 			// close bracket
-			String data = "[" + gson.toJson(getartists.getTopartists()) + " ]";
+			String data = "[" + gson.toJson(getartists.getTopartists()) + "]";
 
 			fw.write(data);
 			fw.flush();
 			fw.close();
 
 		}
-
-	}
-
-	public static void ratingtest() {
-
-		Gson gson = new Gson();
-
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(new File("rsc/topartists.json")));
-		} catch (FileNotFoundException e) {
-			System.out.println("That File Does Not Exist");
-			e.printStackTrace();
-		}
-
-		Type collectionType = new TypeToken<List<Topartists>>() {
-		}.getType();
-		List<Topartists> tal = gson.fromJson(reader, collectionType);
-
-		String topsong = tal.get(1).getArtist().get(0).getName();
-		String user = tal.get(1).getAttr().getUser();
-		System.out.println(user + " " + topsong);
-
-		long rank = Integer.parseInt(tal.get(0).getArtist().get(56).getAttr().getRank());
-
-		long total = tal.get(0).getArtist().size();
-
-		float rating = rank / total;
-
-		long finalrating = (long) (5 * (1 - rating)); // rating of the user
-
-		System.out.println(finalrating);
 
 	}
 
@@ -213,12 +189,6 @@ public class DataCollection {
 		return usernamesOnFile;
 
 	}
-
-	public static void main(String[] args) throws IOException {
-
-	}
-
-	// public static void generateRating
 
 	@SuppressWarnings("unused")
 	private static String getUserID() {
