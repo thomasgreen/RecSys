@@ -4,16 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.Map.Entry;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -31,9 +23,9 @@ import artistsPOJO.Topartists;
 public class RecEngine {
 
 	private List<Topartists> tal;
-	
-	public RecEngine(){
-		//constructor for Rec Engine
+
+	public RecEngine() {
+		// constructor for Rec Engine
 		Gson gson = new Gson();
 
 		BufferedReader reader = null;
@@ -44,55 +36,73 @@ public class RecEngine {
 			e.printStackTrace();
 		}
 
-		Type collectionType = new TypeToken<List<Topartists>>() {}.getType();
+		Type collectionType = new TypeToken<List<Topartists>>() {
+		}.getType();
 		tal = gson.fromJson(reader, collectionType);
 	}
-	
-	
+
 	public static void main(String[] args) throws IOException {
 		RecEngine engine = new RecEngine();
-		
-		//while(true){
-			//String targetuser = engine.getUserID();
-			//getUserData(targetuser); // not yet written
-			
-			//List<RatingUserMap> simRatings = new ArrayList<RatingUserMap>();
-		
-			Map<String, Integer> testmap = new HashMap<String, Integer>();
-			
-			for(int i =  0; i < engine.getTal().size(); i++)
-			{
-				int sim = engine.similarity(engine.getTal().get(0), engine.getTal().get(i ));
-				System.out.println(sim + " " + engine.getTal().get(i).getAttr().getUser());
-				//simRatings.add(new RatingUserMap(sim, engine.getTal().get(i).getAttr().getUser()));
-				testmap.put(engine.getTal().get(i).getAttr().getUser(), sim);
-			}
-			
-			//SORT 
-			/*Map<String, Integer> result = new TreeMap<String, Integer>(testmap, new Comparator<String>{
-				@Override
-	            public int compare(String a, String b) {
-	                int aFreq = stringFreq.get(a);
-	                int bFreq = stringFreq.get(b);
-	                return (aFreq==bFreq)?a.compareTo(b) : (aFreq-bFreq);
-	            }
-			});*/
-			
-			
-			engine.getNeighbours();
-			engine.makeRecommendations();
-		//}
-		
-		
+
+
+		Map<String, Integer> testmap = new HashMap<String, Integer>();
+
+		for (int i = 0; i < engine.getTal().size(); i++) {
+			int sim = engine.similarity(engine.getTal().get(0), engine.getTal().get(i));
+			testmap.put(engine.getTal().get(i).getAttr().getUser(), sim);
+		}
+
+		// SORT
+
+		Map<String, Integer> sorted = engine.sortMapByValues(testmap);
+
+		for (Entry<String, Integer> entry : sorted.entrySet()) {
+			System.out.println(entry.getKey() + " - " + entry.getValue());
+		}
+
+		engine.getNeighbours();
+		engine.makeRecommendations();
+		// }
+
 	}
-	
-	
+
+	private Map<String, Integer> sortMapByValues(Map<String, Integer> aMap) {
+
+		Set<Entry<String, Integer>> mapEntries = aMap.entrySet();
+
+		// used linked list to sort, because insertion of elements in linked
+		// list is faster than an array list.
+		List<Entry<String, Integer>> aList = new LinkedList<Entry<String, Integer>>(mapEntries);
+
+		// sorting the List
+		aList.sort(new Comparator<Entry<String, Integer>>() {
+
+			@Override
+			public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
+				// TODO Auto-generated method stub
+
+				return o1.getValue().compareTo(o2.getValue());
+			}
+
+		});
+		
+		Collections.reverse(aList);
+
+		// Storing the list into Linked HashMap to preserve the order of
+		// insertion.
+		Map<String, Integer> aMap2 = new LinkedHashMap<String, Integer>();
+		for (Entry<String, Integer> entry : aList) {
+			aMap2.put(entry.getKey(), entry.getValue());
+		}
+
+		return aMap2;
+
+	}
 
 	private static void getUserData(String targetuser) {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 	public void generateRating() {
 		// TODO Auto-generated method stub
@@ -108,53 +118,39 @@ public class RecEngine {
 
 		long finalrating = (long) (5 * (1 - rating)); // rating of the user
 
-		System.out.println(finalrating);	
+		System.out.println(finalrating);
 	}
-
-
 
 	public int similarity(Topartists userA, Topartists userB) {
 		// TODO Auto-generated method stub
-		int matchesCount= 0;
-		
-		
-		for(int i = 0; i < userA.getArtist().size(); i++)
-		{
+		int matchesCount = 0;
+
+		for (int i = 0; i < userA.getArtist().size(); i++) {
 			boolean match = false;
-			for(int j = 0; j < userB.getArtist().size(); j++)
-			{
+			for (int j = 0; j < userB.getArtist().size(); j++) {
 				String a = userA.getArtist().get(i).getName();
 				String b = userB.getArtist().get(j).getName();
-				if(a.equals(b))
-				{
+				if (a.equals(b)) {
 					match = true;
 				}
 			}
-			if(match)
-			{
+			if (match) {
 				matchesCount++;
 			}
 		}
-		
-	
+
 		return matchesCount;
 	}
 
-
-
 	public void getNeighbours() {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 	public void makeRecommendations() {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 	public String getUserID() {
 		@SuppressWarnings("resource")
@@ -175,8 +171,5 @@ public class RecEngine {
 	public void setTal(List<Topartists> tal) {
 		this.tal = tal;
 	}
-	
-	
 
-	
 }
