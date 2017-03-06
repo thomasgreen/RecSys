@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -67,8 +68,15 @@ public class RecEngine {
 				testmap.put(engine.getTal().get(i).getAttr().getUser(), sim);
 			}
 			
-			
-
+			//SORT 
+			/*Map<String, Integer> result = new TreeMap<String, Integer>(testmap, new Comparator<String>{
+				@Override
+	            public int compare(String a, String b) {
+	                int aFreq = stringFreq.get(a);
+	                int bFreq = stringFreq.get(b);
+	                return (aFreq==bFreq)?a.compareTo(b) : (aFreq-bFreq);
+	            }
+			});*/
 			
 			
 			engine.getNeighbours();
