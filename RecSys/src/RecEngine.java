@@ -54,11 +54,16 @@ public class RecEngine {
 
 		// SORT
 
-		Map<String, Integer> sorted = engine.sortMapByValues(testmap);
+		List<Entry<String, Integer>> sorted = engine.sortMapByValues(testmap);
 
-		for (Entry<String, Integer> entry : sorted.entrySet()) {
-			System.out.println(entry.getKey() + " - " + entry.getValue());
+		
+		
+		List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(0, 50));
+		
+		for (int i = 0; i < nearest.size(); i++) {
+			System.out.println(nearest.get(i).getKey() + " - " + nearest.get(i).getValue());
 		}
+		
 
 		engine.getNeighbours();
 		engine.makeRecommendations();
@@ -66,7 +71,7 @@ public class RecEngine {
 
 	}
 
-	private Map<String, Integer> sortMapByValues(Map<String, Integer> aMap) {
+	private List<Entry<String, Integer>> sortMapByValues(Map<String, Integer> aMap) {
 
 		Set<Entry<String, Integer>> mapEntries = aMap.entrySet();
 
@@ -95,7 +100,7 @@ public class RecEngine {
 			aMap2.put(entry.getKey(), entry.getValue());
 		}
 
-		return aMap2;
+		return aList;
 
 	}
 
@@ -105,7 +110,6 @@ public class RecEngine {
 	}
 
 	public void generateRating() {
-		// TODO Auto-generated method stub
 		String topsong = getTal().get(0).getArtist().get(0).getName();
 		String user = tal.get(1).getAttr().getUser();
 		System.out.println(user + " " + topsong);
@@ -122,7 +126,6 @@ public class RecEngine {
 	}
 
 	public int similarity(Topartists userA, Topartists userB) {
-		// TODO Auto-generated method stub
 		int matchesCount = 0;
 
 		for (int i = 0; i < userA.getArtist().size(); i++) {
