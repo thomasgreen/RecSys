@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import artistsPOJO.Topartists;
-
+import static java.lang.Math.sqrt;
 /**
  * 
  */
@@ -53,22 +53,135 @@ public class RecEngine {
 		}
 
 		// SORT
-
 		List<Entry<String, Integer>> sorted = engine.sortMapByValues(testmap);
 
 		
-		
+		//get closest neighbours
 		List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(0, 50));
 		
-		for (int i = 0; i < nearest.size(); i++) {
-			System.out.println(nearest.get(i).getKey() + " - " + nearest.get(i).getValue());
+		List<Double> pearsons = new ArrayList<Double>();
+		
+		for(int i = 0; i < nearest.size(); i++)
+		{
+			pearsons.add(engine.pearson(nearest.get(i)));
+
 		}
 		
+		for(double d: pearsons)
+		{
+			System.out.println(d);
+		}
+		
+		
+		/*for (int i = 0; i < nearest.size(); i++) {
+			System.out.println(nearest.get(i).getKey() + " - " + nearest.get(i).getValue());
+		}*/
+		
 
-		engine.getNeighbours();
+		//Map<>
+		
+		
 		engine.makeRecommendations();
 		// }
 
+	}
+
+	public double pearson(Entry<String, Integer> entry) {
+		int n = 0; //number of data points = similarity;
+		n = entry.getValue(); // similarity of the 2 users
+		String userB = entry.getKey();
+		
+		int userBentry = 0;
+		for(int i =0; i < tal.size(); i++)
+		{
+			boolean match = false;
+			
+			if(tal.get(i).getAttr().getUser() == userB)
+			{
+				match = true;
+				
+			}
+			if(match)
+			{
+				userBentry = i;
+				break;
+				
+			}
+		}
+		
+		//get values of common
+				
+		List<Integer> x = new ArrayList<Integer>();// all x values, target users rating in common
+		List<Integer> y = new ArrayList<Integer>();// all x values, data users rating in common
+		
+		
+		
+		for(int i = 0; i < tal.get(0).getArtist().size();i++)//for all the artists the first user likes
+		{
+			String a = tal.get(0).getArtist().get(i).getName();
+			for(int j = 0; j < tal.get(userBentry).getArtist().size();j++) //and all the artists this user likes
+			{
+				
+				String b = tal.get(userBentry).getArtist().get(j).getName();
+				if(a.equals(b))//if they match add the ranking to the x and y array
+				{
+					
+					x.add(i+1);
+					y.add(j+1);
+				}
+			}
+			
+		}
+		
+		List<Integer> xy = new ArrayList<Integer>();//sum of x * y for same song
+		
+		//calc xy values
+		for(int i = 0; i < n; i++)
+		{
+			int xyval = x.get(i) * y.get(i);
+			
+			xy.add(xyval);
+			
+		}
+		
+		
+		int sumx = 0; //sum of x values
+		int sumy = 0; //sum of y values
+		int sumxy = 0; //sum of xy values
+		
+		
+		for(int i = 0; i < n; i++)
+		{
+			sumx = sumx + x.get(i);
+			sumy = sumy + y.get(i);
+			sumxy = sumxy + xy.get(i);
+		}
+		
+		
+		int sumXallSq = sumx * sumx; // (sum(x))^2
+		int sumYallSq = sumy * sumy; // (sum(y))^2
+		
+		
+		
+		int sumXSq = 0; // sum (x^2)
+		
+		int sumYSq = 0; // sum (y^2)
+		
+		
+		for(int i = 0; i < n; i++)
+		{
+			sumXSq += x.get(i) * x.get(i);
+			sumYSq += y.get(i) * y.get(i);
+		}
+		
+		double top = (sumxy - ((sumx * sumy)/n));
+		
+		double left = sqrt((sumXSq) - (sumXallSq/n));
+		double right = sqrt((sumYSq) - (sumYallSq/n));
+		
+		double r = top/(left*right);
+	
+		return r;
 	}
 
 	private List<Entry<String, Integer>> sortMapByValues(Map<String, Integer> aMap) {
@@ -104,6 +217,7 @@ public class RecEngine {
 
 	}
 
+	@SuppressWarnings("unused")
 	private static void getUserData(String targetuser) {
 		// TODO Auto-generated method stub
 
@@ -145,10 +259,7 @@ public class RecEngine {
 		return matchesCount;
 	}
 
-	public void getNeighbours() {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 	public void makeRecommendations() {
 		// TODO Auto-generated method stub
