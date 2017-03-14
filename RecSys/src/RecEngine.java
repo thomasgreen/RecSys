@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import artistsPOJO.Artist;
 import artistsPOJO.Topartists;
 import static java.lang.Math.sqrt;
 /**
@@ -78,7 +79,7 @@ public class RecEngine {
 		}*/
 		
 
-		//Map<>
+		Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>();
 		
 		
 		engine.makeRecommendations();
