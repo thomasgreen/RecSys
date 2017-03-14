@@ -58,19 +58,19 @@ public class RecEngine {
 
 		
 		//get closest neighbours
-		List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(0, 50));
+		List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(1, 51));
 		
-		List<Double> pearsons = new ArrayList<Double>();
+		Map<String, Double> pearsons = new HashMap<String, Double>();
 		
 		for(int i = 0; i < nearest.size(); i++)
 		{
-			pearsons.add(engine.pearson(nearest.get(i)));
+			pearsons.put(nearest.get(i).getKey(),engine.pearson(nearest.get(i)));
 
 		}
 		
-		for(double d: pearsons)
+		for(Entry<String, Double> entry: pearsons.entrySet())
 		{
-			System.out.println(d);
+			System.out.println(entry.getKey() + " " + entry.getValue());
 		}
 		
 		
@@ -79,36 +79,128 @@ public class RecEngine {
 		}*/
 		
 
-		Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>();
+		List<Artist> nearestArtists = new ArrayList<Artist>();
+		
+		/**
+		 * get a list of artists to generate ratings for
+		 */
+		for(Entry<String, Integer> nearestIter: nearest) //for each nearest neighbour map
+		{
+			/**
+			 * get the users place in the array of topartists
+			 * get its top artists and add them to the array
+			 * if the artist with same name is not already there
+			 */
+			
+			int userentry = engine.getuserentryfromusername(nearestIter.getKey());
+			
+			for(Artist artist: engine.getTal().get(userentry).getArtist()){ 
+				//for each artist in the users top 100 add it to the list of nearest artists if not already in
+				if(engine.checkartistunique(artist, nearestArtists)){
+					//is not in the list already, add it
+					nearestArtists.add(artist);
+				}
+			}
+		}
+		
+
+	
+		Map<Artist, Double> reclonglist = new HashMap<Artist, Double>(); //hashmap to hold artists and their predictive rating
+		
+		//calcualte things for rating prediction algortihm
 		
 		
-		engine.makeRecommendations();
-		// }
+		
+		
+		for(Artist artist: nearestArtists){
+			double rating = engine.predictedrating(pearsons, artist);
+			
+			
+			reclonglist.put(artist, rating);
+		}
+		
+		
+		for(Entry<Artist, Double> entry: reclonglist.entrySet())
+		{
+			System.out.println("Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
+			
+		}
+		
+		
 
 	}
 
+	private boolean checkartistunique(Artist artist, List<Artist> nearestArtists) {
+		// TODO Auto-generated method stub
+		for(Artist artistinList: nearestArtists)
+		{
+			if(artistinList.getName().equals(artist.getName()))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public double predictedrating(Map<String, Double> pearsons, Artist artist){
+		
+		double rbara = 50.5; //average rating given by active user. 
+		
+		//for each user who has rated the artist
+		
+		double numerator = 0; 
+		
+		double denominator = 0; //sum of r ratings used	
+		
+		Map<Topartists, Integer> users = new HashMap<Topartists, Integer>(); //users who have reviewed this artist/item
+		for(String userString: pearsons.keySet())
+		{
+			//find the user in the 
+			int userentry = getuserentryfromusername(userString);
+			
+			
+			for(Artist userartistlist : getTal().get(userentry).getArtist())
+			{
+				
+				if(userartistlist.getName().equals(artist.getName()))
+				{
+					
+					users.put(getTal().get(userentry), Integer.parseInt(userartistlist.getAttr().getRank()));
+				}
+				
+			}
+			
+			
+		}
+		
+		//Calculate Sum of Wai (sum of pearsons), denominator
+		
+		for(Entry<Topartists, Integer> user: users.entrySet())
+		{
+			double r = pearsons.get(user.getKey().getAttr().getUser());
+			
+			numerator += (user.getValue() - 50.5) * r;
+			
+			
+			denominator += r;
+		}
+		
+		
+		double pai = rbara +((numerator)/(denominator));
+		return pai;
+	}
+	
+	
+	
+	
+	
 	public double pearson(Entry<String, Integer> entry) {
 		int n = 0; //number of data points = similarity;
 		n = entry.getValue(); // similarity of the 2 users
 		String userB = entry.getKey();
 		
-		int userBentry = 0;
-		for(int i =0; i < tal.size(); i++)
-		{
-			boolean match = false;
-			
-			if(tal.get(i).getAttr().getUser() == userB)
-			{
-				match = true;
-				
-			}
-			if(match)
-			{
-				userBentry = i;
-				break;
-				
-			}
-		}
+		int userBentry = getuserentryfromusername(userB);
+		
 		
 		//get values of common
 				
@@ -185,6 +277,27 @@ public class RecEngine {
 		return r;
 	}
 
+	private int getuserentryfromusername(String userB) {
+		for(int i =0; i < tal.size(); i++)
+		{
+			boolean match = false;
+			
+			if(tal.get(i).getAttr().getUser() == userB)
+			{
+				match = true;
+				
+			}
+			if(match)
+			{
+				return i;
+				
+				
+			}
+			
+		}
+		return 0;
+	}
+
 	private List<Entry<String, Integer>> sortMapByValues(Map<String, Integer> aMap) {
 
 		Set<Entry<String, Integer>> mapEntries = aMap.entrySet();
@@ -224,22 +337,7 @@ public class RecEngine {
 
 	}
 
-	public void generateRating() {
-		String topsong = getTal().get(0).getArtist().get(0).getName();
-		String user = tal.get(1).getAttr().getUser();
-		System.out.println(user + " " + topsong);
-
-		long rank = Integer.parseInt(tal.get(0).getArtist().get(56).getAttr().getRank());
-
-		long total = tal.get(0).getArtist().size();
-
-		float rating = rank / total;
-
-		long finalrating = (long) (5 * (1 - rating)); // rating of the user
-
-		System.out.println(finalrating);
-	}
-
+	
 	public int similarity(Topartists userA, Topartists userB) {
 		int matchesCount = 0;
 
