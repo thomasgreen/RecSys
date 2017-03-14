@@ -119,11 +119,13 @@ public class RecEngine {
 			reclonglist.put(artist, rating);
 		}
 
-		engine.sortByValue(reclonglist);
+		Map<Artist, Integer> sortedrec =  new HashMap<Artist, Integer>();
+				
+		sortedrec =  engine.sortByValue(reclonglist);
 		
 		
 		
-		for (Entry<Artist, Integer> entry : reclonglist.entrySet()) {
+		for (Entry<Artist, Integer> entry : sortedrec.entrySet()) {
 			System.out
 					.println("Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
 
