@@ -47,7 +47,7 @@ public class RecEngine {
 		tal = gson.fromJson(reader, collectionType);
 
 		activeUser = tal.get(0);
-		topk = 100;
+		topk = 10;
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -76,6 +76,9 @@ public class RecEngine {
 				if (engine.totalPlays(topartists) > 5000)
 					testmap.put(topartists.getAttr().getUser(), sim);
 			}
+			
+			
+			
 			// SORT
 			List<Entry<String, Integer>> sorted = engine.sortMapByValues(testmap);
 			// get closest neighbours
