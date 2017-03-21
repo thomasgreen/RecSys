@@ -28,9 +28,10 @@ public class RecEngine {
 
 	private Topartists activeUser;
 	
-	private int topk;
+	private int topN;
 
-	public RecEngine() {
+	private int neighbours;
+	public RecEngine(int input) {
 		// constructor for Rec Engine
 		Gson gson = new Gson();
 
@@ -47,11 +48,12 @@ public class RecEngine {
 		tal = gson.fromJson(reader, collectionType);
 
 		activeUser = tal.get(0);
-		topk = 10;
+		topN = 10;
+		neighbours = input;
 	}
 
 	public static void main(String[] args) throws IOException {
-		RecEngine engine = new RecEngine();
+		RecEngine engine = new RecEngine(15);
 
 		/*
 		 * for (int i = 0; i < nearest.size(); i++) {
@@ -63,7 +65,7 @@ public class RecEngine {
 
 		int active = 0;
 
-		int test = 1000;
+		int test = 400;
 		double[] precisionarray = new double[test];
 		while (active < test) {
 
@@ -73,8 +75,15 @@ public class RecEngine {
 			for (Topartists topartists : engine.getTal()) {
 				int sim = engine.similarity(engine.getActiveUser(), topartists);
 
-				if (engine.totalPlays(topartists) > 5000)
-					testmap.put(topartists.getAttr().getUser(), sim);
+				if (engine.totalPlays(topartists) > 10000)
+				{
+					if(!(topartists.getAttr().getUser().equals(engine.getActiveUser().getAttr().getUser())))
+					{
+						testmap.put(topartists.getAttr().getUser(), sim);
+					}
+					
+				}
+					
 			}
 			
 			
@@ -82,7 +91,7 @@ public class RecEngine {
 			// SORT
 			List<Entry<String, Integer>> sorted = engine.sortMapByValues(testmap);
 			// get closest neighbours
-			List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(0, 16));
+			List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(0, engine.neighbours));
 			Map<String, Double> pearsons = new HashMap<String, Double>();
 			for (int i = 0; i < nearest.size(); i++) {
 				if (nearest.get(i).getValue() > 0) {
@@ -158,7 +167,7 @@ public class RecEngine {
 			}
 			
 			
-			double precision = correct / engine.topk;
+			double precision = correct / engine.topN;
 			
 			
 			
@@ -178,6 +187,144 @@ public class RecEngine {
 	
 
 		System.out.println("avg precision: " + precisionavg);
+		
+	}
+	
+	public double run() {
+		//RecEngine engine = new RecEngine();
+
+		/*
+		 * for (int i = 0; i < nearest.size(); i++) {
+		 * System.out.println(nearest.get(i).getKey() + " - " +
+		 * nearest.get(i).getValue()); }
+		 */
+
+		// calcualte things for rating prediction algortihm
+
+		int active = 0;
+
+		int test = 200;
+		double[] precisionarray = new double[test];
+		while (active < test) {
+
+			setActiveUser(getTal().get(active));
+
+			Map<String, Integer> testmap = new HashMap<String, Integer>();
+			for (Topartists topartists : getTal()) {
+				int sim = similarity(getActiveUser(), topartists);
+
+				if (totalPlays(topartists) > 10000)
+				{
+					if(!(topartists.getAttr().getUser().equals(getActiveUser().getAttr().getUser())))
+					{
+						testmap.put(topartists.getAttr().getUser(), sim);
+					}
+				}
+					
+			}
+			
+			
+			
+			// SORT
+			List<Entry<String, Integer>> sorted = sortMapByValues(testmap);
+			// get closest neighbours
+			List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(0, neighbours));
+			Map<String, Double> pearsons = new HashMap<String, Double>();
+			for (int i = 0; i < nearest.size(); i++) {
+				if (nearest.get(i).getValue() > 0) {
+					pearsons.put(nearest.get(i).getKey(), pearson(nearest.get(i)));
+
+				}
+
+			}
+			for (Entry<String, Double> entry : pearsons.entrySet()) {
+				System.out.println(entry.getKey() + " " + entry.getValue());
+			}
+			List<Artist> nearestArtists = new ArrayList<Artist>();
+			/**
+			 * get a list of artists to generate ratings for
+			 */
+			for (Entry<String, Integer> nearestIter : nearest) // for each
+																// nearest
+																// neighbour map
+			{
+				/**
+				 * get the users place in the array of topartists get its top
+				 * artists and add them to the array if the artist with same
+				 * name is not already there
+				 */
+
+				int userentry = getuserentryfromusername(nearestIter.getKey());
+
+				for (Artist artist : getTal().get(userentry).getArtist()) {
+					// for each artist in the users top 100 add it to the list
+					// of
+					// nearest artists if not already in
+					if (checkartistunique(artist, nearestArtists)) {
+						// is not in the list already, add it
+						nearestArtists.add(artist);
+					}
+				}
+			}
+			Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>(); // hashmap
+																				// to
+																				// hold
+																				// artists
+																				// and
+																				// their
+																				// predictive
+																				// rating
+			for (Artist artist : nearestArtists) {
+				int rating = predictedrating(pearsons, artist);
+
+				reclonglist.put(artist, rating);
+			}
+			Map<Artist, Integer> sortedrec = new TreeMap<Artist, Integer>();
+			sortedrec = sortByValue(reclonglist);
+			System.out.println();
+			System.out.println("Recommendations for: " + getActiveUser().getAttr().getUser());
+			for (Entry<Artist, Integer> entry : sortedrec.entrySet()) {
+				System.out.println(
+						"Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
+
+			}
+			
+			double correct = 0;
+			
+			
+			for (Artist recartist : sortedrec.keySet())
+			{
+				for(Artist activeuser: getTal().get(active).getArtist())
+				{
+					if(recartist.getName().equals(activeuser.getName()))
+					{
+						correct++;
+					}
+				}
+			}
+			
+			
+			double precision = correct / topN;
+			
+			
+			
+			precisionarray[active] = precision;
+			active++;
+		}
+
+		double precisiontotal = 0;
+		for (int i = 0; i < test; i++) {
+			precisiontotal += precisionarray[i];
+		}
+		
+		
+
+		double precisionavg = precisiontotal/test;
+		
+	
+
+		System.out.println("avg precision: " + precisionavg);
+		return precisionavg;
 		
 	}
 
@@ -252,7 +399,7 @@ public class RecEngine {
 
 			double rui = user.getValue();
 
-			numerator += Math.abs((3*rui - rbaru) * r);
+			numerator += (rui - rbaru) * r;
 
 			denominator += r;
 		}
@@ -411,7 +558,7 @@ public class RecEngine {
 		Collections.reverse(list);
 		Map<K, V> result = new LinkedHashMap<K, V>();
 		for (Map.Entry<K, V> entry : list) {
-			if (result.size() <= topk) {
+			if (result.size() <= topN) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
