@@ -16,7 +16,7 @@ public class LinearRegression {
 		{
 			RecEngine engine = new RecEngine(y[i]);
 			
-			x[i] = engine.run();
+			//x[i] = engine.run();
 			
 		}
 		
