@@ -24,13 +24,14 @@ import static java.lang.Math.sqrt;
  */
 public class RecEngine {
 
-	private List<Topartists> tal;
+	private List<Topartists> tal; //list of all users + data in file
 
-	private Topartists activeUser;
-	
-	private int topN;
+	private Topartists activeUser; //the active user getting recommendation
 
-	private int neighbours;
+	private int topN; //how many recommendations to leave 
+
+	private int neighbours; //how many neighbours to use to generate
+
 	public RecEngine(int input) {
 		// constructor for Rec Engine
 		Gson gson = new Gson();
@@ -48,61 +49,91 @@ public class RecEngine {
 		tal = gson.fromJson(reader, collectionType);
 
 		activeUser = tal.get(0);
-		topN = 30;
-		neighbours = input;
+		topN = input;
+		neighbours = 17;
 	}
 
 	public static void main(String[] args) throws IOException {
-		RecEngine engine = new RecEngine(17);
-
-		engine.run();
-		
-	}
-	
-	public void run() {
-
 		/*
-		 * for (int i = 0; i < nearest.size(); i++) {
-		 * System.out.println(nearest.get(i).getKey() + " - " +
-		 * nearest.get(i).getValue()); }
-		 */
+		int topn [] =  {1, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100};
+		
+		float [] precision = new float[20];
+		for(int i = 0; i < topn.length-1; i++)
+		{
+			RecEngine engine = new RecEngine(topn[i]);
+			precision[i] = engine.run();
+		}
+			
+		System.out.println("Neighbours used : 17");
+		for(int i = 0; i < topn.length-1; i++)
+		{
+			System.out.println("Precision at " + topn[i] + " is " + precision[i]);
+		}*/
 
-		// calcualte things for rating prediction algortihm
+		RecEngine engine = new RecEngine(10);
+		engine.run();
+
+	}
+
+	public float run() {
+
 
 		int active = 0;
 
 		int test = 1000;
 		double[] precisionarray = new double[test];
+		double[] recallarray = new double[test];
+
 		double[] maearray = new double[test];
 		while (active < test) {
 
 			setActiveUser(getTal().get(active));
-
-			Map<String, Integer> testmap = new HashMap<String, Integer>();
-			for (Topartists topartists : getTal()) {
-				int sim = similarity(getActiveUser(), topartists);
-
-				if (totalPlays(topartists) > 10000)
-				{
-					if(!(topartists.getAttr().getUser().equals(getActiveUser().getAttr().getUser())))
-					{
-						testmap.put(topartists.getAttr().getUser(), sim);
-					}
-					
-				}
-					
+			
+		
+			
+			if(totalPlays(activeUser) == 0) //if this user has listened to no music
+			{
+				active++;
+				continue; //skip this user
+			}
+			
+			List<Artist> trainingArtist = new ArrayList<Artist>();
+	
+			for(int i = 0; i < activeUser.getArtist().size(); i = i +2)
+			{
+				trainingArtist.add(activeUser.getArtist().get(i)); //add all odd data to training list
+			}
+			
+			List<Artist> testArtist = new ArrayList<Artist>();
+			
+			for(int i = 1; i < activeUser.getArtist().size(); i = i +2)
+			{
+				testArtist.add(activeUser.getArtist().get(i)); //add all odd data to training list
 			}
 			
 			
-			
+			Map<String, Integer> testmap = new HashMap<String, Integer>();
+			for (Topartists topartists : getTal()) {
+				int sim = similarity(trainingArtist, topartists);
+
+				if (totalPlays(topartists) > 10000) {
+					if (!(topartists.getAttr().getUser().equals(getActiveUser().getAttr().getUser()))) {
+						testmap.put(topartists.getAttr().getUser(), sim);
+					}
+
+				}
+
+			}
+
 			// SORT
 			List<Entry<String, Integer>> sorted = sortMapByValues(testmap);
 			// get closest neighbours
-			List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(sorted.subList(0, neighbours));
+			List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(
+					sorted.subList(0, neighbours - 1));
 			Map<String, Double> pearsons = new HashMap<String, Double>();
 			for (int i = 0; i < nearest.size(); i++) {
 				if (nearest.get(i).getValue() > 0) {
-					pearsons.put(nearest.get(i).getKey(), pearson(nearest.get(i)));
+					pearsons.put(nearest.get(i).getKey(), pearson(nearest.get(i), trainingArtist));
 
 				}
 
@@ -145,12 +176,13 @@ public class RecEngine {
 																				// predictive
 																				// rating
 			for (Artist artist : nearestArtists) {
-				int rating = predictedrating(pearsons, artist);
+				int rating = predictedrating(pearsons, artist, trainingArtist);
 
 				reclonglist.put(artist, rating);
 			}
 			Map<Artist, Integer> sortedrec = new TreeMap<Artist, Integer>();
 			sortedrec = sortByValue(reclonglist);
+
 			System.out.println();
 			System.out.println("Recommendations for: " + getActiveUser().getAttr().getUser());
 			for (Entry<Artist, Integer> entry : sortedrec.entrySet()) {
@@ -158,76 +190,95 @@ public class RecEngine {
 						"Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
 
 			}
+
 			
-			//PRECISION
-			double correct = 0;
-	
+			// PRECISION
+			float tp = 0;
+
+			float fp = 0;
+			float fn = 0;
+
 			List<Integer> actual = new ArrayList<Integer>();
 			List<Integer> predicted = new ArrayList<Integer>();
-			for (Artist recartist : sortedrec.keySet())
-			{
-				for(Artist activeuser: getTal().get(active).getArtist())
-				{
-					if(recartist.getName().equals(activeuser.getName()))
-					{
-						correct++;
+			for (Artist recartist : sortedrec.keySet()) {
+				boolean found = false;
+				for (Artist activeuser : testArtist) {
+
+					if (recartist.getName().equals(activeuser.getName())) {
+						found = true;
 						actual.add(Integer.parseInt(activeuser.getAttr().getRank()));
 						predicted.add(Integer.parseInt(recartist.getAttr().getRank()));
-						
+
 					}
+
+				}
+				if (found) // tre positive (recommended correctly
+				{
+					tp++;
+
+				} else { // flase positive (recommended incorrectly)
+					fp++;
 				}
 			}
-			
-			
-			double precision = correct / topN;
-		
+
+			fn = testArtist.size() - tp;
+
+			float precision = tp / (tp + fp);
+			float recall = tp / (tp + fn);
+
 			precisionarray[active] = precision;
-			
-			//MEAN ABSOLUTE ERROR
-			
+			recallarray[active] = recall;
+
+			// MEAN ABSOLUTE ERROR
+
 			List<Integer> difference = new ArrayList<Integer>();
-			
-			for(int actualint: actual)
-			{
-				for(int predictedint: predicted)
-				{
+
+			for (int actualint : actual) {
+				for (int predictedint : predicted) {
 					difference.add(Math.abs(actualint - predictedint));
 				}
 			}
-			
+
 			int differencetotal = 0;
-			for(int differenceint: difference)
-			{
+			for (int differenceint : difference) {
 				differencetotal += differenceint;
 			}
-			
-			if(difference.size() > 0) //if at least 1 recommendation is correct
-			maearray[active] = differencetotal/difference.size();
-			
-			System.out.println("Number of these predictions in users top 100: " + correct);
+
+			if (difference.size() > 0) // if at least 1 recommendation is
+										// correct
+				maearray[active] = differencetotal / difference.size();
+
+			System.out.println("Number of these predictions in users top 100: " + tp);
 			active++;
 		}
 
-		double precisiontotal = 0;
+		float precisiontotal = 0;
+		float recalltotal = 0;
+
 		double maetotal = 0;
 		for (int i = 0; i < test; i++) {
 			precisiontotal += precisionarray[i];
+			recalltotal += recallarray[i];
 			maetotal += maearray[i];
 		}
-		
 
+		float precisionavg = precisiontotal / test;
+		float recallavg = recalltotal / test;
 		
 		
+		double maeavg = maetotal / test;
 
-		double precisionavg = precisiontotal/test;
+		float fscore = 2 * ((precisionavg * recallavg) / (precisionavg + recallavg));
 		
-		double maeavg = maetotal/test;
 		
-
+		
 		System.out.println("avg precision: " + precisionavg);
+		System.out.println("avg recall: " + recallavg);
 		System.out.println("avg MAE: " + maeavg);
+		System.out.println("F1 Score: " + fscore);
 		
-		
+		return precisionavg;
+
 	}
 
 	private int totalPlays(Topartists topartists) {
@@ -250,12 +301,12 @@ public class RecEngine {
 		return true;
 	}
 
-	public int predictedrating(Map<String, Double> pearsons, Artist artist) {
+	public int predictedrating(Map<String, Double> pearsons, Artist artist, List<Artist> trainingArtist) {
 
 		double rbara = 0; // average rating given by active user.
 
 		int tuTotal = 0; // target users total plays to calc rbara
-		for (Artist targetUser : getActiveUser().getArtist()) {
+		for (Artist targetUser : trainingArtist) {
 			tuTotal += Integer.parseInt(targetUser.getPlaycount());
 		}
 
@@ -311,7 +362,7 @@ public class RecEngine {
 		return pai.intValue();
 	}
 
-	public double pearson(Entry<String, Integer> entry) {
+	public double pearson(Entry<String, Integer> entry, List<Artist> trainingArtist) {
 		int n = 0; // number of data points = similarity;
 		n = entry.getValue(); // similarity of the 2 users
 		String userB = entry.getKey();
@@ -325,13 +376,13 @@ public class RecEngine {
 		List<Integer> y = new ArrayList<Integer>();// all x values, data users
 													// rating in common
 
-		for (int i = 0; i < getActiveUser().getArtist().size(); i++)// for all
+		for (int i = 0; i < trainingArtist.size(); i++)// for all
 																	// the
 		// artists the
 		// first user
 		// likes
 		{
-			String a = getActiveUser().getArtist().get(i).getName();
+			String a = trainingArtist.get(i).getName();
 			for (int j = 0; j < tal.get(userBentry).getArtist().size(); j++) // and
 																				// all
 																				// the
@@ -346,7 +397,7 @@ public class RecEngine {
 								// array
 				{
 
-					x.add(Integer.parseInt(getActiveUser().getArtist().get(i).getPlaycount()));
+					x.add(Integer.parseInt(trainingArtist.get(i).getPlaycount()));
 					y.add(Integer.parseInt(tal.get(userBentry).getArtist().get(j).getPlaycount()));
 				}
 			}
@@ -438,11 +489,11 @@ public class RecEngine {
 		// insertion.
 		Map<String, Integer> aMap2 = new LinkedHashMap<String, Integer>();
 		for (Entry<String, Integer> entry : aList) {
-			
-				if (!(entry.getKey().equals(getActiveUser().getAttr().getUser()))) {
-					aMap2.put(entry.getKey(), entry.getValue());
-				}
-			
+
+			if (!(entry.getKey().equals(getActiveUser().getAttr().getUser()))) {
+				aMap2.put(entry.getKey(), entry.getValue());
+			}
+
 		}
 
 		return aList;
@@ -460,7 +511,7 @@ public class RecEngine {
 		Collections.reverse(list);
 		Map<K, V> result = new LinkedHashMap<K, V>();
 		for (Map.Entry<K, V> entry : list) {
-			if (result.size() <= topN) {
+			if (result.size() < topN) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
@@ -468,13 +519,13 @@ public class RecEngine {
 		return result;
 	}
 
-	public int similarity(Topartists userA, Topartists userB) {
+	public int similarity(List<Artist> userA, Topartists userB) {
 		int matchesCount = 0;
 
-		for (int i = 0; i < userA.getArtist().size(); i++) {
+		for (int i = 0; i < userA.size(); i++) { //use every other data point TEST DATA TODO
 			boolean match = false;
 			for (int j = 0; j < userB.getArtist().size(); j++) {
-				String a = userA.getArtist().get(i).getName();
+				String a = userA.get(i).getName();
 				String b = userB.getArtist().get(j).getName();
 				if (a.equals(b)) {
 					match = true;
@@ -488,7 +539,6 @@ public class RecEngine {
 		return matchesCount;
 	}
 
-	
 	public List<Topartists> getTal() {
 		return tal;
 	}
