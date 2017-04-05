@@ -53,35 +53,11 @@ public class RecEngine {
 		neighbours = 17;
 	}
 
-	public static void main(String[] args) throws IOException {
-		/*
-		int topn [] =  {1, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100};
+	public Map<Artist, Integer> recommend(List<Artist> trainingArtist) {
+
 		
-		float [] precision = new float[20];
-		for(int i = 0; i < topn.length-1; i++)
-		{
-			RecEngine engine = new RecEngine(topn[i]);
-			precision[i] = engine.run();
-		}
-			
-		System.out.println("Neighbours used : 17");
-		for(int i = 0; i < topn.length-1; i++)
-		{
-			System.out.println("Precision at " + topn[i] + " is " + precision[i]);
-		}*/
-
-		RecEngine engine = new RecEngine(10);
-		engine.run();
-
-	}
-
-	public float run() {
-
-
-		int active = 0;
-
-		int test = 1000;
-		double[] precisionarray = new double[test];
+		
+		/*double[] precisionarray = new double[test];
 		double[] recallarray = new double[test];
 
 		double[] maearray = new double[test];
@@ -96,27 +72,27 @@ public class RecEngine {
 				active++;
 				continue; //skip this user
 			}
-			
+		
 			List<Artist> trainingArtist = new ArrayList<Artist>();
 	
 			for(int i = 0; i < activeUser.getArtist().size(); i = i +2)
 			{
 				trainingArtist.add(activeUser.getArtist().get(i)); //add all odd data to training list
-			}
+			} 
 			
 			List<Artist> testArtist = new ArrayList<Artist>();
 			
 			for(int i = 1; i < activeUser.getArtist().size(); i = i +2)
 			{
 				testArtist.add(activeUser.getArtist().get(i)); //add all odd data to training list
-			}
+			} */
 			
 			
 			Map<String, Integer> testmap = new HashMap<String, Integer>();
 			for (Topartists topartists : getTal()) {
 				int sim = similarity(trainingArtist, topartists);
 
-				if (totalPlays(topartists) > 10000) {
+				if (totalPlays(topartists) > 100) {
 					if (!(topartists.getAttr().getUser().equals(getActiveUser().getAttr().getUser()))) {
 						testmap.put(topartists.getAttr().getUser(), sim);
 					}
@@ -183,17 +159,20 @@ public class RecEngine {
 			Map<Artist, Integer> sortedrec = new TreeMap<Artist, Integer>();
 			sortedrec = sortByValue(reclonglist);
 
-			System.out.println();
+			/*System.out.println();
 			System.out.println("Recommendations for: " + getActiveUser().getAttr().getUser());
 			for (Entry<Artist, Integer> entry : sortedrec.entrySet()) {
 				System.out.println(
 						"Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
 
-			}
+			}*/
+			
+			return sortedrec;
+		
 
 			
 			// PRECISION
-			float tp = 0;
+			/*float tp = 0;
 
 			float fp = 0;
 			float fn = 0;
@@ -277,8 +256,8 @@ public class RecEngine {
 		System.out.println("avg MAE: " + maeavg);
 		System.out.println("F1 Score: " + fscore);
 		
-		return precisionavg;
-
+		//return precisionavg;
+*/
 	}
 
 	private int totalPlays(Topartists topartists) {
@@ -310,7 +289,7 @@ public class RecEngine {
 			tuTotal += Integer.parseInt(targetUser.getPlaycount());
 		}
 
-		rbara = tuTotal / 100;
+		rbara = tuTotal / trainingArtist.size(); //WRONG TODO NEEDS TO BE BY AVERAGE PLAYS NOT SIZE OF ARRAY	
 		// for each user who has rated the artist
 
 		double numerator = 0;
@@ -347,12 +326,12 @@ public class RecEngine {
 				uTotal += Integer.parseInt(currentuser.getPlaycount());
 			}
 
-			rbaru = uTotal / 100;
+			rbaru = uTotal / user.getKey().getArtist().size(); //TODO NEEDS TO BE TOTAL
 			double r = pearsons.get(user.getKey().getAttr().getUser());
 
 			double rui = user.getValue();
 
-			numerator += (rui - rbaru) * r;
+			numerator += (rui - rbaru) * r; //TODO maybe wrong, think i need to do this at the end with arrays
 
 			denominator += r;
 		}
