@@ -50,12 +50,7 @@ public class Evaluation {
 	
 	public void run()
 	{
-		//set up array DONT KNOW HOW
-		
-		//split the user (in another method)
-		
-		//run engine on theat user. it should return SOMETHING I DONT KNOW WHAT
-		
+
 		/*		Artist Models		*/
 		
 		//testing the k value
@@ -96,34 +91,95 @@ public class Evaluation {
 				continue; //skip this user
 			}
 			
-			List<Artist> trainingArtist = new ArrayList<Artist>();
+			List<Artist> fold1 = new ArrayList<Artist>();
+			List<Artist> fold2 = new ArrayList<Artist>();
+			List<Artist> fold3 = new ArrayList<Artist>();
+			List<Artist> fold4 = new ArrayList<Artist>();
+			List<Artist> fold5 = new ArrayList<Artist>();
 			
-			for(int i = 0; i < activeUser.getArtist().size(); i = i +2)
+			List<List<Artist>> fold = new ArrayList<List<Artist>>();
+			
+			fold.add(fold1);
+			fold.add(fold2);
+			fold.add(fold3);
+			fold.add(fold4);
+			fold.add(fold5);
+			for(int i = 0; i < activeUser.getArtist().size() / 5; i++)
 			{
-				trainingArtist.add(activeUser.getArtist().get(i)); //add all odd data to training list
+				fold1.add(activeUser.getArtist().get(i)); //add all odd data to training list
 			}
 			
-			List<Artist> testArtist = new ArrayList<Artist>();
-			
-			for(int i = 1; i < activeUser.getArtist().size(); i = i +2)
+			for(int i = fold1.size(); i < 2 *(activeUser.getArtist().size() / 5); i++)
 			{
-				testArtist.add(activeUser.getArtist().get(i)); //add all odd data to training list
+				fold2.add(activeUser.getArtist().get(i)); //add all odd data to training list
 			}
 			
-			Map<Artist, Integer> recommended = new HashMap<Artist, Integer>();
-			String username = activeUser.getAttr().getUser();
-			recommended = testEngine.recommend(trainingArtist, username);
+			for(int i = fold1.size(); i < 3 *(activeUser.getArtist().size() / 5); i++)
+			{
+				fold3.add(activeUser.getArtist().get(i)); //add all odd data to training list
+			}
 			
-			System.out.println();
-			System.out.println("Recommendations for: " + activeUser.getAttr().getUser());
-			for (Entry<Artist, Integer> entry : recommended.entrySet()) {
-				System.out.println(
-						"Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
+			for(int i = fold1.size(); i < 4 *(activeUser.getArtist().size() / 5); i++)
+			{
+				fold4.add(activeUser.getArtist().get(i)); //add all odd data to training list
+			}
+			
+			for(int i = fold1.size(); i < 5 *(activeUser.getArtist().size() / 5); i++)
+			{
+				fold5.add(activeUser.getArtist().get(i)); //add all odd data to training list
+			}
+			
 
+			float precisionFold[] = new float[5];
+			for(List<Artist> testFold : fold)
+			{
+				//for each fold
+				List<Artist> trainingArtist = new ArrayList<Artist>();
+				List<Artist> testArtist = new ArrayList<Artist>();
+
+				for(List<Artist> foldVal : fold)
+				{
+					if(foldVal.equals(testFold))
+					{
+						//empty contents into TEST ARTIST
+						unfold(testArtist, foldVal);
+					}
+					else
+					{
+						//empty contents into TRAINING ARTIST
+						unfold(trainingArtist, foldVal);
+					}
+				}
+				
+				
+				
+				//make follow code and generate average for each fold
+				Map<Artist, Integer> recommended = new HashMap<Artist, Integer>();
+				String username = activeUser.getAttr().getUser();
+				recommended = testEngine.recommend(trainingArtist, username);
+				
+				System.out.println();
+				System.out.println("Recommendations for: " + activeUser.getAttr().getUser());
+				for (Entry<Artist, Integer> entry : recommended.entrySet()) {
+					System.out.println(
+							"Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
+
+				}
+				precisionFold[fold.indexOf(testFold)] = evaluate(recommended, testArtist);
+			}
+
+			float precisionFoldSum = 0;
+			for(float val : precisionFold)
+			{
+				precisionFoldSum += val;
 			}
 			
-			precision[active] = evaluate(recommended, testArtist);
+			float precisionFoldAvg = precisionFoldSum / 5;
+			
+			precision[active] = precisionFoldAvg;
 			active++;
+			//will be in loop below
+			
 		}
 		
 		float precisionSum = 0;
@@ -137,6 +193,16 @@ public class Evaluation {
 		return precisionAvg;
 	}
 	
+	private void unfold(List<Artist> list, List<Artist> foldVal) {
+		// TODO Auto-generated method stub iterate of fold val and add to training artist
+		for(Artist foldArtist: foldVal)
+		{
+			list.add(foldArtist);
+		}
+		
+		
+	}
+
 	private float evaluate(Map<Artist, Integer> recommended, List<Artist> testArtist) {
 		//this is where precision and stuff are calculated maybe
 		float tp = 0;
