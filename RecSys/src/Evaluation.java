@@ -21,6 +21,7 @@ public class Evaluation {
 	
 	private Topartists activeUser; //the active user getting recommendation
 	
+	private int test; //number of users the model will be tested on
 	
 	
 	public static void main(String[] args) {
@@ -44,6 +45,7 @@ public class Evaluation {
 		Type collectionType = new TypeToken<List<Topartists>>() {
 		}.getType();
 		tal = gson.fromJson(reader, collectionType);
+		test = 200;
 	}
 	
 	public void run()
@@ -53,12 +55,37 @@ public class Evaluation {
 		//split the user (in another method)
 		
 		//run engine on theat user. it should return SOMETHING I DONT KNOW WHAT
+		
+		/*		Artist Models		*/
+		
+		//testing the k value
+		
+		int[] kTestValues = {1, 5, 10, 15, 20 ,25, 30, 45, 50};
+		float[] kTestResults = new float[9];
+		for(int i = 0; i < kTestValues.length; i++)
+		{
+			RecEngine testEngine = new RecEngine(10, kTestValues[i]);
+			kTestResults[i] = runModel(testEngine);
+			
+		}
+		
+		for(float val: kTestResults)
+		{
+			System.out.println(val);
+		}
+		
+		
+		/*		Track Models		*/
+		
+		
+		
+	}
+	
+	private float runModel(RecEngine testEngine)
+	{
 		int active = 0;
-		int test = 1000;
 		
-		
-		
-		RecEngine testEngine = new RecEngine(10);
+		float[] precision = new float[1000];
 		while (active < test)
 		{
 			activeUser = tal.get(active); //set the active user
@@ -83,22 +110,68 @@ public class Evaluation {
 				testArtist.add(activeUser.getArtist().get(i)); //add all odd data to training list
 			}
 			
-			Map<Artist, Integer> recomended = new HashMap<Artist, Integer>();
-			recomended = testEngine.recommend(trainingArtist);
+			Map<Artist, Integer> recommended = new HashMap<Artist, Integer>();
+			String username = activeUser.getAttr().getUser();
+			recommended = testEngine.recommend(trainingArtist, username);
 			
 			System.out.println();
 			System.out.println("Recommendations for: " + activeUser.getAttr().getUser());
-			for (Entry<Artist, Integer> entry : recomended.entrySet()) {
+			for (Entry<Artist, Integer> entry : recommended.entrySet()) {
 				System.out.println(
 						"Aritst: " + entry.getKey().getName() + "\t \t \t Predicted Rating: " + entry.getValue());
 
 			}
 			
+			precision[active] = evaluate(recommended, testArtist);
+			active++;
 		}
 		
+		float precisionSum = 0;
+		for(float val : precision)
+		{
+			precisionSum += val;
+		}
 		
+		float precisionAvg = precisionSum / precision.length;
+		
+		return precisionAvg;
 	}
 	
+	private float evaluate(Map<Artist, Integer> recommended, List<Artist> testArtist) {
+		//this is where precision and stuff are calculated maybe
+		float tp = 0;
+
+		float fp = 0;
+
+		List<Integer> actual = new ArrayList<Integer>();
+		List<Integer> predicted = new ArrayList<Integer>();
+		for (Artist recartist : recommended.keySet()) {
+			boolean found = false;
+			for (Artist activeuser : testArtist) {
+
+				if (recartist.getName().equals(activeuser.getName())) {
+					found = true;
+					actual.add(Integer.parseInt(activeuser.getAttr().getRank()));
+					predicted.add(Integer.parseInt(recartist.getAttr().getRank()));
+
+				}
+
+			}
+			if (found) // true positive (recommended correctly
+			{
+				tp++;
+
+			} else { // false positive (recommended incorrectly)
+				fp++;
+			}
+		}
+
+		
+
+		float precision = tp / (tp + fp);
+		return precision;
+	}
+
 	private int totalPlays(Topartists topartists) {
 		int total = 0;
 
