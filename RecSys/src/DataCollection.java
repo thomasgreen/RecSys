@@ -121,8 +121,6 @@ public class DataCollection {
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
 
-		// String test = reader.readLine();
-
 		GetTopArtists getartists = gson.fromJson(reader, GetTopArtists.class);
 
 		reader.close();
@@ -159,9 +157,7 @@ public class DataCollection {
 
 		} else { // if this is the first json added
 			FileWriter fw = new FileWriter(file);
-			// start bracket
-			// add json
-			// close bracket
+
 			String data = "[" + gson.toJson(getartists.getTopartists()) + "]";
 
 			fw.write(data);
