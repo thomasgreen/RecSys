@@ -190,7 +190,7 @@ public class Evaluation {
 		
 	}
 
-	private float runModel(Recommender testEngine)
+	private float runModel(AdvancedModel testEngine)
 	{
 		int active = 0;
 		

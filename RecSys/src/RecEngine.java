@@ -22,34 +22,12 @@ import static java.lang.Math.sqrt;
  * @author thomasgreen
  *
  */
-public class RecEngine extends Recommender{
-
-	private List<Topartists> tal; //list of all users + data in file
-
-	private Topartists activeUser; //the active user getting recommendation
-
-	private int topN; //how many recommendations to leave 
+public class RecEngine extends AdvancedModel{
 
 	private int neighbours; //how many neighbours to use to generate
 
 	public RecEngine(int topNValue, int neighboursValue) {
-		// constructor for Rec Engine
-		Gson gson = new Gson();
-
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(new File("rsc/topartists.json")));
-		} catch (FileNotFoundException e) {
-			System.out.println("That File Does Not Exist");
-			e.printStackTrace();
-		}
-
-		Type collectionType = new TypeToken<List<Topartists>>() {
-		}.getType();
-		tal = gson.fromJson(reader, collectionType);
-
-		activeUser = tal.get(0);
-		topN = topNValue;
+		super(topNValue);
 		neighbours = neighboursValue;
 	}
 
@@ -253,7 +231,7 @@ public class RecEngine extends Recommender{
 		// likes
 		{
 			String a = trainingArtist.get(i).getName();
-			for (int j = 0; j < tal.get(userBentry).getArtist().size(); j++) // and
+			for (int j = 0; j < getTal().get(userBentry).getArtist().size(); j++) // and
 																				// all
 																				// the
 																				// artists
@@ -262,13 +240,13 @@ public class RecEngine extends Recommender{
 																				// likes
 			{
 
-				String b = tal.get(userBentry).getArtist().get(j).getName();
+				String b = getTal().get(userBentry).getArtist().get(j).getName();
 				if (a.equals(b))// if they match add the ranking to the x and y
 								// array
 				{
 
 					x.add(Integer.parseInt(trainingArtist.get(i).getPlaycount()));
-					y.add(Integer.parseInt(tal.get(userBentry).getArtist().get(j).getPlaycount()));
+					y.add(Integer.parseInt(getTal().get(userBentry).getArtist().get(j).getPlaycount()));
 				}
 			}
 
@@ -318,10 +296,10 @@ public class RecEngine extends Recommender{
 	}
 
 	private int getuserentryfromusername(String userB) {
-		for (int i = 0; i < tal.size(); i++) {
+		for (int i = 0; i < getTal().size(); i++) {
 			boolean match = false;
 
-			if (tal.get(i).getAttr().getUser() == userB) {
+			if (getTal().get(i).getAttr().getUser() == userB) {
 				match = true;
 
 			}
@@ -381,7 +359,7 @@ public class RecEngine extends Recommender{
 		Collections.reverse(list);
 		Map<K, V> result = new LinkedHashMap<K, V>();
 		for (Map.Entry<K, V> entry : list) {
-			if (result.size() < topN) {
+			if (result.size() < getTopN()) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
@@ -409,20 +387,6 @@ public class RecEngine extends Recommender{
 		return matchesCount;
 	}
 
-	public List<Topartists> getTal() {
-		return tal;
-	}
 
-	public void setTal(List<Topartists> tal) {
-		this.tal = tal;
-	}
-
-	public Topartists getActiveUser() {
-		return activeUser;
-	}
-
-	public void setActiveUser(Topartists activeUser) {
-		this.activeUser = activeUser;
-	}
 
 }

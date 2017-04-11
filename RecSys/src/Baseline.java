@@ -21,32 +21,13 @@ import com.google.gson.reflect.TypeToken;
 import artistsPOJO.Artist;
 import artistsPOJO.Topartists;
 
-public class Baseline{
+public class Baseline extends Recommender{
 
-	private List<Topartists> tal; //list of all users + data in file
-
-	private Topartists activeUser; //the active user getting recommendation
-
-	private int topN; //how many recommendations to leave 
+	
 	
 	public Baseline(int topNValue)
 	{
-		Gson gson = new Gson();
-
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(new File("rsc/topartists.json")));
-		} catch (FileNotFoundException e) {
-			System.out.println("That File Does Not Exist");
-			e.printStackTrace();
-		}
-
-		Type collectionType = new TypeToken<List<Topartists>>() {
-		}.getType();
-		tal = gson.fromJson(reader, collectionType);
-
-		activeUser = tal.get(0);
-		topN = topNValue;
+		super(topNValue);
 	}
 	
 	
@@ -62,7 +43,7 @@ public class Baseline{
 		
 		
 		
-		for(Topartists topartists : tal) //for each user
+		for(Topartists topartists : getTal()) //for each user
 		{
 			for(Artist artist : topartists.getArtist())
 			{
@@ -121,7 +102,7 @@ public class Baseline{
 		Collections.reverse(list);
 		Map<K, V> result = new LinkedHashMap<K, V>();
 		for (Map.Entry<K, V> entry : list) {
-			if (result.size() < topN) {
+			if (result.size() < getTopN()) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
@@ -139,4 +120,5 @@ public class Baseline{
 		}
 		return true;
 	}
+
 }
