@@ -7,7 +7,6 @@ public abstract class AdvancedModel extends Recommender {
 
 	public AdvancedModel(int topNValue) {
 		super(topNValue);
-		// TODO Auto-generated constructor stub
 	}
 	
 	
