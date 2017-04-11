@@ -22,7 +22,7 @@ import static java.lang.Math.sqrt;
  * @author thomasgreen
  *
  */
-public class RecEngine {
+public class RecEngine extends Recommender{
 
 	private List<Topartists> tal; //list of all users + data in file
 
@@ -55,6 +55,11 @@ public class RecEngine {
 
 	public Map<Artist, Integer> recommend(List<Artist> trainingArtist, String username) {
 
+			if(username.equals("bagelo"))
+			{
+				System.out.println("PASUE");
+			}
+			
 			
 			
 			Map<String, Integer> testmap = new HashMap<String, Integer>();
@@ -134,56 +139,6 @@ public class RecEngine {
 			
 			return sortedrec;
 
-			/*// MEAN ABSOLUTE ERROR
-
-			List<Integer> difference = new ArrayList<Integer>();
-
-			for (int actualint : actual) {
-				for (int predictedint : predicted) {
-					difference.add(Math.abs(actualint - predictedint));
-				}
-			}
-
-			int differencetotal = 0;
-			for (int differenceint : difference) {
-				differencetotal += differenceint;
-			}
-
-			if (difference.size() > 0) // if at least 1 recommendation is
-										// correct
-				maearray[active] = differencetotal / difference.size();
-
-			System.out.println("Number of these predictions in users top 100: " + tp);
-			active++;
-		}
-
-		float precisiontotal = 0;
-		float recalltotal = 0;
-
-		double maetotal = 0;
-		for (int i = 0; i < test; i++) {
-			precisiontotal += precisionarray[i];
-			recalltotal += recallarray[i];
-			maetotal += maearray[i];
-		}
-
-		float precisionavg = precisiontotal / test;
-		float recallavg = recalltotal / test;
-		
-		
-		double maeavg = maetotal / test;
-
-		float fscore = 2 * ((precisionavg * recallavg) / (precisionavg + recallavg));
-		
-		
-		
-		System.out.println("avg precision: " + precisionavg);
-		System.out.println("avg recall: " + recallavg);
-		System.out.println("avg MAE: " + maeavg);
-		System.out.println("F1 Score: " + fscore);
-		
-		//return precisionavg;
-*/
 	}
 
 	private int totalPlays(Topartists topartists) {
@@ -225,7 +180,7 @@ public class RecEngine {
 			tuTotal += Integer.parseInt(targetUser.getPlaycount());
 		}
 
-		rbara = tuTotal / trainingArtist.size(); //WRONG TODO NEEDS TO BE BY AVERAGE PLAYS NOT SIZE OF ARRAY	
+		rbara = tuTotal / trainingArtist.size();
 		// for each user who has rated the artist
 
 		double numerator = 0;

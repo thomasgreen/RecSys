@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,18 +46,27 @@ public class Evaluation {
 		Type collectionType = new TypeToken<List<Topartists>>() {
 		}.getType();
 		tal = gson.fromJson(reader, collectionType);
-		test = 200;
+		test = 1000;
 	}
 	
 	public void run()
 	{
 
+		//BASELINE
+		
+	
+		//Baseline baseline = new Baseline(10);
+		
+		//float result = runBaselineModel(baseline);
+		
+		//System.out.println(result);
 		/*		Artist Models		*/
 		
+
 		//testing the k value
 		
 		int[] kTestValues = {1, 5, 10, 15, 20 ,25, 30, 45, 50};
-		float[] kTestResults = new float[9];
+		float[] kTestResults = new float[10];
 		for(int i = 0; i < kTestValues.length; i++)
 		{
 			RecEngine testEngine = new RecEngine(10, kTestValues[i]);
@@ -76,8 +86,18 @@ public class Evaluation {
 		
 	}
 	
-	private float runModel(RecEngine testEngine)
+	private float runBaselineModel(Baseline baseline)
 	{
+		
+		Map<Artist, Integer> recommended = new LinkedHashMap<Artist, Integer>();
+		
+		recommended = baseline.recommend();
+		
+		for(Entry<Artist, Integer> entry: recommended.entrySet())
+		{
+			System.out.println(entry.getKey().getName() + " " + entry.getValue());
+		}
+		
 		int active = 0;
 		
 		float[] precision = new float[1000];
@@ -85,7 +105,7 @@ public class Evaluation {
 		{
 			activeUser = tal.get(active); //set the active user
 			
-			if(totalPlays(activeUser) == 0) //if this user has listened to no music
+			if(totalPlays(activeUser) < 100) //if this user has listened to no music
 			{
 				active++;
 				continue; //skip this user
@@ -104,32 +124,103 @@ public class Evaluation {
 			fold.add(fold3);
 			fold.add(fold4);
 			fold.add(fold5);
-			for(int i = 0; i < activeUser.getArtist().size() / 5; i++)
-			{
-				fold1.add(activeUser.getArtist().get(i)); //add all odd data to training list
-			}
 			
-			for(int i = fold1.size(); i < 2 *(activeUser.getArtist().size() / 5); i++)
-			{
-				fold2.add(activeUser.getArtist().get(i)); //add all odd data to training list
-			}
+			generateFold(fold, activeUser);
 			
-			for(int i = fold1.size(); i < 3 *(activeUser.getArtist().size() / 5); i++)
-			{
-				fold3.add(activeUser.getArtist().get(i)); //add all odd data to training list
-			}
 			
-			for(int i = fold1.size(); i < 4 *(activeUser.getArtist().size() / 5); i++)
+			float precisionFold[] = new float[5]; //LOOK AT FOLD SIZES
+			for(List<Artist> testFold : fold)
 			{
-				fold4.add(activeUser.getArtist().get(i)); //add all odd data to training list
+				
+				precisionFold[fold.indexOf(testFold)] = evaluate(recommended, testFold);
+				
 			}
-			
-			for(int i = fold1.size(); i < 5 *(activeUser.getArtist().size() / 5); i++)
-			{
-				fold5.add(activeUser.getArtist().get(i)); //add all odd data to training list
-			}
-			
 
+			float precisionFoldSum = 0;
+			for(float val : precisionFold)
+			{
+				precisionFoldSum += val;
+			}
+			
+			float precisionFoldAvg = precisionFoldSum / 5;
+			
+			precision[active] = precisionFoldAvg;
+			active++;
+			//will be in loop below
+			
+		}
+		
+		float precisionSum = 0;
+		for(float val : precision)
+		{
+			precisionSum += val;
+		}
+		
+		float precisionAvg = precisionSum / precision.length;
+		
+		return precisionAvg;
+	}
+	
+	private void generateFold(List<List<Artist>> fold, Topartists activeUser2) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < activeUser.getArtist().size() / 5; i++)
+		{
+			fold.get(0).add(activeUser.getArtist().get(i)); //add all odd data to training list
+		}
+		
+		for(int i = fold.get(0).size(); i < 2 *(activeUser.getArtist().size() / 5); i++)
+		{
+			fold.get(1).add(activeUser.getArtist().get(i)); //add all odd data to training list
+		}
+		
+		for(int i = 2 * fold.get(0).size(); i < 3 *(activeUser.getArtist().size() / 5); i++)
+		{
+			fold.get(2).add(activeUser.getArtist().get(i)); //add all odd data to training list
+		}
+		
+		for(int i = 3 * fold.get(0).size(); i < 4 *(activeUser.getArtist().size() / 5); i++)
+		{
+			fold.get(3).add(activeUser.getArtist().get(i)); //add all odd data to training list
+		}
+		
+		for(int i = 4 * fold.get(0).size(); i < 5 *(activeUser.getArtist().size() / 5); i++)
+		{
+			fold.get(4).add(activeUser.getArtist().get(i)); //add all odd data to training list
+		}
+		
+	}
+
+	private float runModel(Recommender testEngine)
+	{
+		int active = 0;
+		
+		float[] precision = new float[1000];
+		while (active < test)
+		{
+			activeUser = tal.get(active); //set the active user
+			
+			if(totalPlays(activeUser) < 100) //if this user has listened to no music
+			{
+				active++;
+				continue; //skip this user
+			}
+			
+			List<Artist> fold1 = new ArrayList<Artist>();
+			List<Artist> fold2 = new ArrayList<Artist>();
+			List<Artist> fold3 = new ArrayList<Artist>();
+			List<Artist> fold4 = new ArrayList<Artist>();
+			List<Artist> fold5 = new ArrayList<Artist>();
+			
+			List<List<Artist>> fold = new ArrayList<List<Artist>>();
+			
+			fold.add(fold1);
+			fold.add(fold2);
+			fold.add(fold3);
+			fold.add(fold4);
+			fold.add(fold5);
+			
+			generateFold(fold, activeUser);
+			
 			float precisionFold[] = new float[5];
 			for(List<Artist> testFold : fold)
 			{
