@@ -15,11 +15,11 @@ import static java.lang.Math.sqrt;
  * @author thomasgreen
  *
  */
-public class RecEngine extends AdvancedModel{
+public class ArtistModel extends AdvancedModel{
 
 	private int neighbours; //how many neighbours to use to generate
 
-	public RecEngine(int topNValue, int neighboursValue) {
+	public ArtistModel(int topNValue, int neighboursValue) {
 		super(topNValue);
 		neighbours = neighboursValue;
 	}
@@ -340,25 +340,6 @@ public class RecEngine extends AdvancedModel{
 		
 		return aList;
 
-	}
-
-	public <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-		List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(map.entrySet());
-		Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
-			public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
-				return (o1.getValue()).compareTo(o2.getValue());
-			}
-		});
-
-		Collections.reverse(list);
-		Map<K, V> result = new LinkedHashMap<K, V>();
-		for (Map.Entry<K, V> entry : list) {
-			if (result.size() < getTopN()) {
-				result.put(entry.getKey(), entry.getValue());
-			}
-		}
-
-		return result;
 	}
 
 	public int similarity(List<Artist> userA, Topartists userB) {

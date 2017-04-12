@@ -80,8 +80,6 @@ public class Baseline extends Recommender{
 		return sortedrec;
 	}
 	
-	
-	
 
 
 	private boolean artistUnique(Artist artist, List<Artist> nearestArtists) {
