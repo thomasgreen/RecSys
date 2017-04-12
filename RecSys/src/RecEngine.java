@@ -42,7 +42,7 @@ public class RecEngine extends AdvancedModel{
 				int sim = similarity(trainingArtist, topartists);
 
 				if (totalPlays(topartists) > 100) {
-					if (!(topartists.getAttr().getUser().equals(getActiveUser().getAttr().getUser()))) {
+					if (!(topartists.getAttr().getUser().equals(username))) {
 						testmap.put(topartists.getAttr().getUser(), sim);
 					}
 
@@ -51,7 +51,7 @@ public class RecEngine extends AdvancedModel{
 			}
 
 			// SORT
-			List<Entry<String, Integer>> sorted = sortMapByValues(testmap);
+			List<Entry<String, Integer>> sorted = sortMapByValues(testmap, username);
 			// get closest neighbours
 			List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(
 					sorted.subList(0, neighbours));
@@ -305,7 +305,7 @@ public class RecEngine extends AdvancedModel{
 		return 0;
 	}
 
-	private List<Entry<String, Integer>> sortMapByValues(Map<String, Integer> aMap) {
+	private List<Entry<String, Integer>> sortMapByValues(Map<String, Integer> aMap, String username) {
 
 		Set<Entry<String, Integer>> mapEntries = aMap.entrySet();
 
@@ -331,12 +331,13 @@ public class RecEngine extends AdvancedModel{
 		Map<String, Integer> aMap2 = new LinkedHashMap<String, Integer>();
 		for (Entry<String, Integer> entry : aList) {
 
-			if (!(entry.getKey().equals(getActiveUser().getAttr().getUser()))) {
+			if (!(entry.getKey().equals(username))) {
 				aMap2.put(entry.getKey(), entry.getValue());
 			}
 
 		}
 
+		
 		return aList;
 
 	}

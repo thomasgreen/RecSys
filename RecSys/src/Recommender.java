@@ -15,8 +15,6 @@ public abstract class Recommender {
 
 	private List<Topartists> tal; //list of all users + data in file
 
-	private Topartists activeUser; //the active user getting recommendation
-
 	private int topN; //how many recommendations to leave 
 
 	
@@ -38,7 +36,6 @@ public abstract class Recommender {
 				}.getType();
 				tal = gson.fromJson(reader, collectionType);
 
-				activeUser = tal.get(0);
 				topN = topNValue;
 				
 	}
@@ -48,9 +45,7 @@ public abstract class Recommender {
 	public List<Topartists> getTal() {
 		return tal;
 	}
-	public Topartists getActiveUser() {
-		return activeUser;
-	}
+
 	public int getTopN() {
 		return topN;
 	}
@@ -58,9 +53,7 @@ public abstract class Recommender {
 	public void setTal(List<Topartists> tal) {
 		this.tal = tal;
 	}
-	public void setActiveUser(Topartists activeUser) {
-		this.activeUser = activeUser;
-	}
+
 	public void setTopN(int topN) {
 		this.topN = topN;
 	}
