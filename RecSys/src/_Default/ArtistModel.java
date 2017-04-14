@@ -29,65 +29,63 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 	public Map<Artist, Integer> recommend(List<Artist> trainingArtist, String username) {
 
 			
-			Map<String, Integer> testmap = new HashMap<String, Integer>();
-			for (Topartists topartists : getTal()) {
-				if(topartists.getAttr().getUser().equals(username))
-				{
-					continue; //skip this user from the neighbours if it is the same user
-				}
-				int sim = similarity(trainingArtist, topartists);
-
-				if (totalPlays(topartists) > 100) {
-					if (!(topartists.getAttr().getUser().equals(username))) {
-						testmap.put(topartists.getAttr().getUser(), sim);
-					}
-
-				}
-
-			}
-
-			// SORT
-			List<Entry<String, Integer>> sorted = sortMapByValues(testmap, username);
-			// get closest neighbours
-			List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(
-					sorted.subList(0, neighbours));
-			Map<String, Double> pearsons = new HashMap<String, Double>();
-			for (int i = 0; i < nearest.size(); i++) {
-				if (nearest.get(i).getValue() > 0) {
-					pearsons.put(nearest.get(i).getKey(), pearson(nearest.get(i), trainingArtist));
-
-				}
-
-			}
-			for (Entry<String, Double> entry : pearsons.entrySet()) {
-				System.out.println(entry.getKey() + " " + entry.getValue());
-			}
-			List<Artist> nearestArtists = new ArrayList<Artist>();
-			/**
-			 * get a list of artists to generate ratings for
-			 */
-			for (Entry<String, Integer> nearestIter : nearest) // for each nearest neighbour map
+		Map<String, Integer> testmap = new HashMap<String, Integer>();
+		for (Topartists topartists : getTal()) {
+			if(topartists.getAttr().getUser().equals(username))
 			{
-				int userentry = entryOfUser(nearestIter.getKey());
-				for (Artist artist : getTal().get(userentry).getItem()) {
-					// for each artist in the users top 100 add it to the list
-					// of
-					// nearest artists if not already in
-					if (isUnique(artist, nearestArtists) && isDuplicate(artist, trainingArtist)) {
-						// is not in the list already, add it	
-						nearestArtists.add(artist);
-					}
+				continue; //skip this user from the neighbours if it is the same user
+			}
+			int sim = similarity(trainingArtist, topartists);
+	
+			if (totalPlays(topartists) > 100) {
+				if (!(topartists.getAttr().getUser().equals(username))) {
+					testmap.put(topartists.getAttr().getUser(), sim);
+				}
+
+			}
+
+		}
+
+		// SORT
+		List<Entry<String, Integer>> sorted = sortMapByValues(testmap, username);
+		// get closest neighbours
+		List<Entry<String, Integer>> nearest = new LinkedList<Entry<String, Integer>>(
+				sorted.subList(0, neighbours));
+		Map<String, Double> pearsons = new HashMap<String, Double>();
+		for (int i = 0; i < nearest.size(); i++) {
+			if (nearest.get(i).getValue() > 0) {
+				pearsons.put(nearest.get(i).getKey(), pearson(nearest.get(i), trainingArtist));
+			}
+		}
+		for (Entry<String, Double> entry : pearsons.entrySet()) {
+			System.out.println(entry.getKey() + " " + entry.getValue());
+		}
+		List<Artist> nearestArtists = new ArrayList<Artist>();
+		/**
+		 * get a list of artists to generate ratings for
+		 **/
+		for (Entry<String, Integer> nearestIter : nearest) // for each nearest neighbour map
+		{
+			int userentry = entryOfUser(nearestIter.getKey());
+			for (Artist artist : getTal().get(userentry).getItem()) {
+				// for each artist in the users top 100 add it to the list
+				// of
+				// nearest artists if not already in
+				if (isUnique(artist, nearestArtists) && isDuplicate(artist, trainingArtist)) {
+					// is not in the list already, add it	
+					nearestArtists.add(artist);
 				}
 			}
-			Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>(); 
-			// hashmap to hold  artists and their predictive rating
-			for (Artist artist : nearestArtists) {
-				int rating = predictedrating(pearsons, artist, trainingArtist);
-				reclonglist.put(artist, rating);
-			}
-			Map<Artist, Integer> sortedrec = new TreeMap<Artist, Integer>();
-			sortedrec = sortByValue(reclonglist);
-			return sortedrec;
+		}
+		Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>(); 
+		// hashmap to hold  artists and their predictive rating
+		for (Artist artist : nearestArtists) {
+			int rating = predictedrating(pearsons, artist, trainingArtist);
+			reclonglist.put(artist, rating);
+		}
+		Map<Artist, Integer> sortedrec = new TreeMap<Artist, Integer>();
+		sortedrec = sortByValue(reclonglist);
+		return sortedrec;
 	}
 
 	public int totalPlays(Topartists topartists) {
