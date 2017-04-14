@@ -37,7 +37,7 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 			}
 			int sim = similarity(trainingArtist, topartists);
 	
-			if (totalPlays(topartists) > 100) {
+			if (totalPlays(topartists) > 500) {
 				if (!(topartists.getAttr().getUser().equals(username))) {
 					testmap.put(topartists.getAttr().getUser(), sim);
 				}
