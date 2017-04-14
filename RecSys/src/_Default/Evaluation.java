@@ -69,7 +69,7 @@ public class Evaluation {
 		
 		
 		
-		test = 200;
+		test = 100;
 	}
 	
 	public void run()
