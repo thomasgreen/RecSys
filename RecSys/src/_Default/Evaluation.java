@@ -85,9 +85,9 @@ public class Evaluation {
 		
 		
 		
-		AdvancedModel<Track, Toptracks> trackmodel = new TrackModel(10, 17);
+		AdvancedModel<Artist, Topartists> trackmodel = new ArtistModel(10, 17);
 		
-		float advancedresult = runModel(trackmodel, ttl);
+		float advancedresult = runModel(trackmodel, tal);
 		//System.out.print(baselineresult);
 		
 		System.out.print(advancedresult);

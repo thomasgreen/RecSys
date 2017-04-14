@@ -68,58 +68,37 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 			 */
 			for (Entry<String, Integer> nearestIter : nearest) // for each nearest neighbour map
 			{
-				/**
-				 * get the users place in the array of topartists get its top
-				 * artists and add them to the array if the artist with same
-				 * name is not already there
-				 */
-
 				int userentry = entryOfUser(nearestIter.getKey());
-
 				for (Artist artist : getTal().get(userentry).getItem()) {
 					// for each artist in the users top 100 add it to the list
 					// of
 					// nearest artists if not already in
 					if (isUnique(artist, nearestArtists) && isDuplicate(artist, trainingArtist)) {
-						// is not in the list already, add it
-						
+						// is not in the list already, add it	
 						nearestArtists.add(artist);
 					}
 				}
 			}
-			Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>(); // hashmap
-																				// to
-																				// hold
-																				// artists
-																				// and
-																				// their
-																				// predictive
-																				// rating
+			Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>(); 
+			// hashmap to hold  artists and their predictive rating
 			for (Artist artist : nearestArtists) {
 				int rating = predictedrating(pearsons, artist, trainingArtist);
-
 				reclonglist.put(artist, rating);
 			}
 			Map<Artist, Integer> sortedrec = new TreeMap<Artist, Integer>();
 			sortedrec = sortByValue(reclonglist);
-
-			
 			return sortedrec;
-
 	}
 
 	public int totalPlays(Topartists topartists) {
 		int total = 0;
-
 		for (Artist artist : topartists.getItem()) {
 			total += Integer.parseInt(artist.getPlaycount());
 		}
-
 		return total;
 	}
 
 	public boolean isUnique(Artist artist, List<Artist> nearestArtists) {
-
 		for (Artist artistinList : nearestArtists) {
 			if (artistinList.getName().equals(artist.getName())) {
 				return false;
@@ -139,21 +118,15 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 	}
 
 	public int predictedrating(Map<String, Double> pearsons, Artist artist, List<Artist> trainingArtist) {
-
 		double rbara = 0; // average rating given by active user.
-
 		int tuTotal = 0; // target users total plays to calc rbara
 		for (Artist targetUser : trainingArtist) {
 			tuTotal += Integer.parseInt(targetUser.getPlaycount());
 		}
-
 		rbara = tuTotal / trainingArtist.size();
 		// for each user who has rated the artist
-
 		double numerator = 0;
-
 		double denominator = 0; // sum of r ratings used
-
 		Map<Topartists, Integer> users = new HashMap<Topartists, Integer>(); // users
 																				// who
 																				// have
@@ -163,16 +136,11 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 		for (String userString : pearsons.keySet()) {
 			// find the user in the
 			int userentry = entryOfUser(userString);
-
 			for (Artist userartistlist : getTal().get(userentry).getItem()) {
-
 				if (userartistlist.getName().equals(artist.getName())) {
-
 					users.put(getTal().get(userentry), Integer.parseInt(userartistlist.getPlaycount()));
 				}
-
 			}
-
 		}
 
 		// Calculate Sum of Wai (sum of pearsons), denominator
@@ -183,19 +151,13 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 			for (Artist currentuser : user.getKey().getItem()) {
 				uTotal += Integer.parseInt(currentuser.getPlaycount());
 			}
-
 			rbaru = uTotal / user.getKey().getItem().size(); //TODO NEEDS TO BE TOTAL
 			double r = pearsons.get(user.getKey().getAttr().getUser());
-
 			double rui = user.getValue();
-
 			numerator += (rui - rbaru) * r; //TODO maybe wrong, think i need to do this at the end with arrays
-
 			denominator += r;
 		}
-
 		Double pai = rbara + ((numerator) / (denominator));
-
 		return pai.intValue();
 	}
 
@@ -203,84 +165,50 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 		int n = 0; // number of data points = similarity;
 		n = entry.getValue(); // similarity of the 2 users
 		String userB = entry.getKey();
-
 		int userBentry = entryOfUser(userB);
-
 		// get values of common
-
-		List<Integer> x = new ArrayList<Integer>();// all x values, target users
-													// rating in common
-		List<Integer> y = new ArrayList<Integer>();// all x values, data users
-													// rating in common
-
-		for (int i = 0; i < trainingArtist.size(); i++)// for all
-																	// the
-		// artists the
-		// first user
-		// likes
+		List<Integer> x = new ArrayList<Integer>();// all x values, target users rating in common
+		List<Integer> y = new ArrayList<Integer>();// all x values, data users ating in common
+		for (int i = 0; i < trainingArtist.size(); i++)
 		{
 			String a = trainingArtist.get(i).getName();
-			for (int j = 0; j < getTal().get(userBentry).getItem().size(); j++) // and
-																				// all
-																				// the
-																				// artists
-																				// this
-																				// user
-																				// likes
+			for (int j = 0; j < getTal().get(userBentry).getItem().size(); j++) 
 			{
-
 				String b = getTal().get(userBentry).getItem().get(j).getName();
-				if (a.equals(b))// if they match add the ranking to the x and y
-								// array
+				if (a.equals(b))// if they match add the ranking to the x and y array
 				{
-
 					x.add(Integer.parseInt(trainingArtist.get(i).getPlaycount()));
 					y.add(Integer.parseInt(getTal().get(userBentry).getItem().get(j).getPlaycount()));
 				}
 			}
-
 		}
-
-		List<Integer> xy = new ArrayList<Integer>();// sum of x * y for same
-													// song
+		List<Integer> xy = new ArrayList<Integer>();// sum of x * y for same artist
 
 		// calc xy values
 		for (int i = 0; i < n; i++) {
 			int xyval = x.get(i) * y.get(i);
-
 			xy.add(xyval);
-
 		}
-
 		int sumx = 0; // sum of x values
 		int sumy = 0; // sum of y values
 		int sumxy = 0; // sum of xy values
-
 		for (int i = 0; i < n; i++) {
 			sumx = sumx + x.get(i);
 			sumy = sumy + y.get(i);
 			sumxy = sumxy + xy.get(i);
 		}
-
 		int sumXallSq = sumx * sumx; // (sum(x))^2
 		int sumYallSq = sumy * sumy; // (sum(y))^2
-
 		int sumXSq = 0; // sum (x^2)
-
 		int sumYSq = 0; // sum (y^2)
-
 		for (int i = 0; i < n; i++) {
 			sumXSq += x.get(i) * x.get(i);
 			sumYSq += y.get(i) * y.get(i);
 		}
-
 		double top = (sumxy - ((sumx * sumy) / n));
-
 		double left = sqrt((sumXSq) - (sumXallSq / n));
 		double right = sqrt((sumYSq) - (sumYallSq / n));
-
 		double r = top / (left * right);
-
 		return r;
 	}
 
@@ -309,7 +237,6 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 		// insertion.
 		Map<String, Integer> aMap2 = new LinkedHashMap<String, Integer>();
 		for (Entry<String, Integer> entry : aList) {
-
 			if (!(entry.getKey().equals(username))) {
 				aMap2.put(entry.getKey(), entry.getValue());
 			}
