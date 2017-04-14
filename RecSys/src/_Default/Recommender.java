@@ -1,3 +1,4 @@
+package _Default;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,11 +15,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import artistsPOJO.Topartists;
+import tracksPOJO.Toptracks;
 
 public abstract class Recommender {
 
-	private List<Topartists> tal; //list of all users + data in file
+	private List<Topartists> tal; //list of all users + thier artists in file
 
+	private List<Toptracks> ttl;  //list of all users + their tracks in file
+	
 	private int topN; //how many recommendations to leave 
 
 	
@@ -28,18 +32,32 @@ public abstract class Recommender {
 		// constructor for Rec Engine
 				Gson gson = new Gson();
 
-				BufferedReader reader = null;
+				BufferedReader artistreader = null;
 				try {
-					reader = new BufferedReader(new FileReader(new File("rsc/topartists.json")));
+					artistreader = new BufferedReader(new FileReader(new File("rsc/topartists.json")));
 				} catch (FileNotFoundException e) {
 					System.out.println("That File Does Not Exist");
 					e.printStackTrace();
 				}
 
-				Type collectionType = new TypeToken<List<Topartists>>() {
+				Type artistType = new TypeToken<List<Topartists>>() {
 				}.getType();
-				tal = gson.fromJson(reader, collectionType);
+				tal = gson.fromJson(artistreader, artistType);
+				
+				
 
+				BufferedReader trackreader = null;
+				try {
+					trackreader = new BufferedReader(new FileReader(new File("rsc/toptracks.json")));
+				} catch (FileNotFoundException e) {
+					System.out.println("That File Does Not Exist");
+					e.printStackTrace();
+				}
+
+				Type trackType = new TypeToken<List<Toptracks>>() {
+				}.getType();
+				ttl = gson.fromJson(trackreader, trackType);
+				
 				topN = topNValue;
 				
 	}
@@ -78,6 +96,14 @@ public abstract class Recommender {
 
 	public void setTopN(int topN) {
 		this.topN = topN;
+	}
+
+	public List<Toptracks> getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(List<Toptracks> ttl) {
+		this.ttl = ttl;
 	}
 
 }

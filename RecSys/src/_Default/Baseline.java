@@ -1,3 +1,4 @@
+package _Default;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +36,7 @@ public class Baseline extends Recommender{
 		
 		for(Topartists topartists : getTal()) //for each user
 		{
-			for(Artist artist : topartists.getArtist())
+			for(Artist artist : topartists.getItem())
 			{
 				
 				if(artistUnique(artist, artistlist)) //add plays

@@ -1,3 +1,4 @@
+package _Default;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,6 +10,7 @@ import com.google.gson.Gson;
 import FriendsPOJO.GetFriends;
 import UserPOJO.UserInfo;
 import artistsPOJO.GetTopArtists;
+import tracksPOJO.GetTopTracks;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,32 +36,20 @@ public class DataCollection {
 
 		List<String> users = getUsersFromFile();
 
+//		for (int i = 0; i < 1000; i++) {
+//			getUserTopArtists(users.get(i));
+//			System.out.println(i);
+//		}
+		
 		for (int i = 0; i < 1000; i++) {
-			getUserTopArtists(users.get(i));
+			getUserTopTracks(users.get(i));
 			System.out.println(i);
 		}
 
+		
 		System.out.println("DONE");
 	}
 
-	public static void getUserInfo(String username) throws IOException {
-
-		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.getinfo&" + "user=" + username
-				+ "&api_key=" + API_KEY + "&format=json");
-
-		final InputStream inputstream = APISend(reqURL);
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
-
-		UserInfo userinfo = gson.fromJson(reader, UserInfo.class);
-
-		if (userinfo != null) {
-
-			System.out.println("User Name: " + userinfo.getUser().getName() + "\nURL: " + userinfo.getUser().getUrl()
-					+ "\nPlay Count: " + userinfo.getUser().getPlaycount());
-		}
-
-	}
 
 	public static void getUserFriends(String username) throws IOException {
 
@@ -159,6 +149,61 @@ public class DataCollection {
 			FileWriter fw = new FileWriter(file);
 
 			String data = "[" + gson.toJson(getartists.getTopartists()) + "]";
+
+			fw.write(data);
+			fw.flush();
+			fw.close();
+
+		}
+
+	}
+	
+	public static void getUserTopTracks(String username) throws IOException {
+		final URL reqURL = new URL("http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&" + "user=" + username
+				+ "&api_key=" + API_KEY + "&limit= 100 &format=json");
+
+		final InputStream inputstream = APISend(reqURL);
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
+
+		GetTopTracks gettracks = gson.fromJson(reader, GetTopTracks.class);
+
+		reader.close();
+
+		File file = new File("rsc/toptracks.json");
+
+		if (file.exists()) {// if there is already 1 element in the file
+			Scanner sc = new Scanner(new File("rsc/toptracks.json"));
+
+			String currentdata = "";
+
+			while (sc.hasNextLine()) {
+				currentdata = sc.nextLine();
+				System.out.println();
+
+			}
+
+			FileWriter fw = new FileWriter(file, false);
+
+			currentdata = currentdata.substring(0, (currentdata.length() - 1));
+
+			currentdata += ","; // append comma
+
+			currentdata = currentdata + "" + gson.toJson(gettracks.getToptracks());
+
+			currentdata += "]"; // close bracket
+
+			fw.write("");
+
+			fw.write(currentdata);
+			fw.flush();
+			fw.close();
+			sc.close();
+
+		} else { // if this is the first json added
+			FileWriter fw = new FileWriter(file);
+
+			String data = "[" + gson.toJson(gettracks.getToptracks()) + "]";
 
 			fw.write(data);
 			fw.flush();

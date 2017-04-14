@@ -5,8 +5,9 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import FriendsPOJO.Image;
+import _Default.Item;
 
-public class Artist {
+public class Artist extends Item{
 
 	@SerializedName("name")
 	@Expose

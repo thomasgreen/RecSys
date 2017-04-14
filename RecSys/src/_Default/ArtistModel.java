@@ -1,3 +1,4 @@
+package _Default;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -15,7 +16,7 @@ import static java.lang.Math.sqrt;
  * @author thomasgreen
  *
  */
-public class ArtistModel extends AdvancedModel{
+public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 
 	private int neighbours; //how many neighbours to use to generate
 
@@ -24,14 +25,9 @@ public class ArtistModel extends AdvancedModel{
 		neighbours = neighboursValue;
 	}
 
+	@Override
 	public Map<Artist, Integer> recommend(List<Artist> trainingArtist, String username) {
 
-			if(username.equals("bagelo"))
-			{
-				System.out.println("PASUE");
-			}
-			
-			
 			
 			Map<String, Integer> testmap = new HashMap<String, Integer>();
 			for (Topartists topartists : getTal()) {
@@ -78,13 +74,13 @@ public class ArtistModel extends AdvancedModel{
 				 * name is not already there
 				 */
 
-				int userentry = getuserentryfromusername(nearestIter.getKey());
+				int userentry = entryOfUser(nearestIter.getKey());
 
-				for (Artist artist : getTal().get(userentry).getArtist()) {
+				for (Artist artist : getTal().get(userentry).getItem()) {
 					// for each artist in the users top 100 add it to the list
 					// of
 					// nearest artists if not already in
-					if (artistUnique(artist, nearestArtists) && artistDuplicate(artist, trainingArtist)) {
+					if (isUnique(artist, nearestArtists) && isDuplicate(artist, trainingArtist)) {
 						// is not in the list already, add it
 						
 						nearestArtists.add(artist);
@@ -112,17 +108,17 @@ public class ArtistModel extends AdvancedModel{
 
 	}
 
-	private int totalPlays(Topartists topartists) {
+	public int totalPlays(Topartists topartists) {
 		int total = 0;
 
-		for (Artist artist : topartists.getArtist()) {
+		for (Artist artist : topartists.getItem()) {
 			total += Integer.parseInt(artist.getPlaycount());
 		}
 
 		return total;
 	}
 
-	private boolean artistUnique(Artist artist, List<Artist> nearestArtists) {
+	public boolean isUnique(Artist artist, List<Artist> nearestArtists) {
 
 		for (Artist artistinList : nearestArtists) {
 			if (artistinList.getName().equals(artist.getName())) {
@@ -132,7 +128,7 @@ public class ArtistModel extends AdvancedModel{
 		return true;
 	}
 	
-	private boolean artistDuplicate(Artist artist, List<Artist> trainingArtist)
+	public boolean isDuplicate(Artist artist, List<Artist> trainingArtist)
 	{
 		for (Artist artistinList : trainingArtist) {
 			if (artistinList.getName().equals(artist.getName())) {
@@ -166,9 +162,9 @@ public class ArtistModel extends AdvancedModel{
 																				// artist/item
 		for (String userString : pearsons.keySet()) {
 			// find the user in the
-			int userentry = getuserentryfromusername(userString);
+			int userentry = entryOfUser(userString);
 
-			for (Artist userartistlist : getTal().get(userentry).getArtist()) {
+			for (Artist userartistlist : getTal().get(userentry).getItem()) {
 
 				if (userartistlist.getName().equals(artist.getName())) {
 
@@ -184,11 +180,11 @@ public class ArtistModel extends AdvancedModel{
 		for (Entry<Topartists, Integer> user : users.entrySet()) {
 			double rbaru = 0; // average playcount of user;
 			int uTotal = 0; // target users total plays to calc rbara
-			for (Artist currentuser : user.getKey().getArtist()) {
+			for (Artist currentuser : user.getKey().getItem()) {
 				uTotal += Integer.parseInt(currentuser.getPlaycount());
 			}
 
-			rbaru = uTotal / user.getKey().getArtist().size(); //TODO NEEDS TO BE TOTAL
+			rbaru = uTotal / user.getKey().getItem().size(); //TODO NEEDS TO BE TOTAL
 			double r = pearsons.get(user.getKey().getAttr().getUser());
 
 			double rui = user.getValue();
@@ -208,7 +204,7 @@ public class ArtistModel extends AdvancedModel{
 		n = entry.getValue(); // similarity of the 2 users
 		String userB = entry.getKey();
 
-		int userBentry = getuserentryfromusername(userB);
+		int userBentry = entryOfUser(userB);
 
 		// get values of common
 
@@ -224,7 +220,7 @@ public class ArtistModel extends AdvancedModel{
 		// likes
 		{
 			String a = trainingArtist.get(i).getName();
-			for (int j = 0; j < getTal().get(userBentry).getArtist().size(); j++) // and
+			for (int j = 0; j < getTal().get(userBentry).getItem().size(); j++) // and
 																				// all
 																				// the
 																				// artists
@@ -233,13 +229,13 @@ public class ArtistModel extends AdvancedModel{
 																				// likes
 			{
 
-				String b = getTal().get(userBentry).getArtist().get(j).getName();
+				String b = getTal().get(userBentry).getItem().get(j).getName();
 				if (a.equals(b))// if they match add the ranking to the x and y
 								// array
 				{
 
 					x.add(Integer.parseInt(trainingArtist.get(i).getPlaycount()));
-					y.add(Integer.parseInt(getTal().get(userBentry).getArtist().get(j).getPlaycount()));
+					y.add(Integer.parseInt(getTal().get(userBentry).getItem().get(j).getPlaycount()));
 				}
 			}
 
@@ -288,23 +284,6 @@ public class ArtistModel extends AdvancedModel{
 		return r;
 	}
 
-	private int getuserentryfromusername(String userB) {
-		for (int i = 0; i < getTal().size(); i++) {
-			boolean match = false;
-
-			if (getTal().get(i).getAttr().getUser() == userB) {
-				match = true;
-
-			}
-			if (match) {
-				return i;
-
-			}
-
-		}
-		return 0;
-	}
-
 	private List<Entry<String, Integer>> sortMapByValues(Map<String, Integer> aMap, String username) {
 
 		Set<Entry<String, Integer>> mapEntries = aMap.entrySet();
@@ -347,9 +326,9 @@ public class ArtistModel extends AdvancedModel{
 
 		for (int i = 0; i < userA.size(); i++) { //use every other data point TEST DATA TODO
 			boolean match = false;
-			for (int j = 0; j < userB.getArtist().size(); j++) {
+			for (int j = 0; j < userB.getItem().size(); j++) {
 				String a = userA.get(i).getName();
-				String b = userB.getArtist().get(j).getName();
+				String b = userB.getItem().get(j).getName();
 				if (a.equals(b)) {
 					match = true;
 				}
