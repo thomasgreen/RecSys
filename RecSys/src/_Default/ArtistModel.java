@@ -122,17 +122,10 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 			tuTotal += Integer.parseInt(targetUser.getPlaycount());
 		}
 		rbara = tuTotal / trainingArtist.size();
-		// for each user who has rated the artist
 		double numerator = 0;
 		double denominator = 0; // sum of r ratings used
-		Map<Topartists, Integer> users = new HashMap<Topartists, Integer>(); // users
-																				// who
-																				// have
-																				// reviewed
-																				// this
-																				// artist/item
+		Map<Topartists, Integer> users = new HashMap<Topartists, Integer>(); 
 		for (String userString : pearsons.keySet()) {
-			// find the user in the
 			int userentry = entryOfUser(userString);
 			for (Artist userartistlist : getTal().get(userentry).getItem()) {
 				if (userartistlist.getName().equals(artist.getName())) {
@@ -140,19 +133,16 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 				}
 			}
 		}
-
-		// Calculate Sum of Wai (sum of pearsons), denominator
-
 		for (Entry<Topartists, Integer> user : users.entrySet()) {
 			double rbaru = 0; // average playcount of user;
 			int uTotal = 0; // target users total plays to calc rbara
 			for (Artist currentuser : user.getKey().getItem()) {
 				uTotal += Integer.parseInt(currentuser.getPlaycount());
 			}
-			rbaru = uTotal / user.getKey().getItem().size(); //TODO NEEDS TO BE TOTAL
+			rbaru = uTotal / user.getKey().getItem().size(); 
 			double r = pearsons.get(user.getKey().getAttr().getUser());
 			double rui = user.getValue();
-			numerator += (rui - rbaru) * r; //TODO maybe wrong, think i need to do this at the end with arrays
+			numerator += (rui - rbaru) * r;
 			denominator += r;
 		}
 		Double pai = rbara + ((numerator) / (denominator));
