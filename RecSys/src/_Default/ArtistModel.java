@@ -167,16 +167,16 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 		// get values of common
 		List<Integer> x = new ArrayList<Integer>();// all x values, target users rating in common
 		List<Integer> y = new ArrayList<Integer>();// all x values, data users ating in common
-		for (int i = 0; i < trainingArtist.size(); i++)
+		for (Artist artist1 : trainingArtist)
 		{
-			String a = trainingArtist.get(i).getName();
-			for (int j = 0; j < getTal().get(userBentry).getItem().size(); j++) 
+			String a = artist1.getName();
+			for (Artist artist2 : getTal().get(userBentry).getItem()) 
 			{
-				String b = getTal().get(userBentry).getItem().get(j).getName();
+				String b = artist2.getName();
 				if (a.equals(b))// if they match add the ranking to the x and y array
 				{
-					x.add(Integer.parseInt(trainingArtist.get(i).getPlaycount()));
-					y.add(Integer.parseInt(getTal().get(userBentry).getItem().get(j).getPlaycount()));
+					x.add(Integer.parseInt(artist1.getPlaycount()));
+					y.add(Integer.parseInt(artist2.getPlaycount()));
 				}
 			}
 		}
