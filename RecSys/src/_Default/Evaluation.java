@@ -76,37 +76,21 @@ public class Evaluation {
 	{
 
 		//BASELINE
+		Baseline baseline = new Baseline(10);
+		float baselineresult = runBaselineModel(baseline);
 		
-	
-		//Baseline baseline = new Baseline(10);
-		
-		//float baselineresult = runBaselineModel(baseline);
-		
-		
-		
-		
-		AdvancedModel<Artist, Topartists> trackmodel = new ArtistModel(10, 17);
-		
-		float advancedresult = runModel(trackmodel, tal);
-		//System.out.print(baselineresult);
-		
-		System.out.print(advancedresult);
-		
-		
-		/*		Artist Models		
-		
-
+		/*		Artist Models	*/	
 		//testing the k value
-		
 		int[] kTestValues = {1, 5, 10, 15, 20 ,25, 30, 45, 50};
 		float[] kTestResults = new float[10];
 		for(int i = 0; i < kTestValues.length; i++)
 		{
-			//ArtistModel testEngine = new ArtistModel(10, kTestValues[i]);
-			//kTestResults[i] = runModel(testEngine);
+			AdvancedModel<Artist, Topartists> testEngine = new ArtistModel(10, kTestValues[i]);
+			kTestResults[i] = runModel(testEngine, tal);
 			
 		}
 		
+		System.out.println(baselineresult);
 		for(float val: kTestResults)
 		{
 			System.out.println(val);
