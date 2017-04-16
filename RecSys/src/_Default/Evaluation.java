@@ -292,24 +292,14 @@ public class Evaluation {
 	
 	
 	private <T extends Item> double evaluate(Map<T, Integer> recommended, List<T> testItem) {
-		//this is where precision and stuff are calculated maybe
 		double tp = 0;
-
 		double fp = 0;
-
-		List<Integer> actual = new ArrayList<Integer>();
-		List<Integer> predicted = new ArrayList<Integer>();
 		for (T recItem : recommended.keySet()) {
 			boolean found = false;
 			for (T activeuser : testItem) {
-
 				if (recItem.getName().equals(activeuser.getName())) {
 					found = true;
-					actual.add(Integer.parseInt(activeuser.getAttr().getRank()));
-					predicted.add(Integer.parseInt(recItem.getAttr().getRank()));
-
 				}
-
 			}
 			if (found) // true positive (recommended correctly
 			{
@@ -319,9 +309,6 @@ public class Evaluation {
 				fp++;
 			}
 		}
-
-		
-
 		double precision = tp / (tp + fp);
 		return precision;
 	}
