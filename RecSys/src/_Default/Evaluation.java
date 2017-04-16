@@ -107,24 +107,18 @@ public class Evaluation {
 	private double runBaselineModel(Baseline baseline)
 	{
 		Topartists activeUser;
-		
 		Map<Artist, Integer> recommended = new LinkedHashMap<Artist, Integer>();
-		
 		recommended = baseline.recommend();
-		
 		for(Entry<Artist, Integer> entry: recommended.entrySet())
 		{
 			System.out.println(entry.getKey().getName() + " " + entry.getValue());
 		}
-		
 		int active = 0;
-		
 		double[] precision = new double[1000];
 		while (active < test)
 		{
-			activeUser = tal.get(active); //set the active user
-			
-			if(totalPlays(activeUser) < 25) //if this user has listened to no music
+			activeUser = tal.get(active); //set the active user	
+			if(totalPlays(activeUser) < 25) //if this user has listened to not enough music
 			{
 				active++;
 				continue; //skip this user
@@ -212,20 +206,16 @@ public class Evaluation {
 	private <T extends Item, K extends TopItem<T>> double runModel(AdvancedModel<T, K> testEngine, List<K> userList)
 	{
 		int active = 0;
-		
 		TopItem<T> activeUser;
-		
 		double[] precision = new double[1000];
 		while (active < test)
 		{
 			activeUser = userList.get(active); //set the active user
-			
-			if(totalPlays(activeUser) < 100) //if this user has listened to not enough music.
+			if(totalPlays(activeUser) < 25) //if this user has listened to not enough music.
 			{
 				active++;
 				continue; //skip this user
-			}
-			
+			}	
 			List<T> fold1 = new ArrayList<T>();
 			List<T> fold2 = new ArrayList<T>();
 			List<T> fold3 = new ArrayList<T>();
