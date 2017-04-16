@@ -79,7 +79,7 @@ public class Evaluation {
 		Baseline baseline = new Baseline(10);
 		double baselineresult = runBaselineModel(baseline);
 		
-		/*		Artist Models	*/	
+		/*		Artist Models		
 		//testing the k value
 		int[] kTestValues = {1, 5, 10, 15, 20 ,25, 30, 45, 50};
 		double[] kTestResults = new double[10];
@@ -88,10 +88,10 @@ public class Evaluation {
 			AdvancedModel<Artist, Topartists> testEngine = new ArtistModel(10, kTestValues[i]);
 			kTestResults[i] = runModel(testEngine, tal);
 			
-		}
+		} */
 		
 		System.out.println(baselineresult);
-		for(double val: kTestResults)
+		/*for(double val: kTestResults)
 		{
 			System.out.println(val);
 		}
@@ -114,7 +114,7 @@ public class Evaluation {
 			System.out.println(entry.getKey().getName() + " " + entry.getValue());
 		}
 		int active = 0;
-		double[] precision = new double[1000];
+		List<Double> precision = new ArrayList<Double>();
 		while (active < test)
 		{
 			activeUser = tal.get(active); //set the active user	
@@ -148,7 +148,7 @@ public class Evaluation {
 				precisionFoldSum += val;
 			}
 			double precisionFoldAvg = precisionFoldSum / 5;
-			precision[active] = precisionFoldAvg;
+			precision.add(precisionFoldAvg);
 			active++;
 		}	
 		double precisionSum = 0;
@@ -156,7 +156,7 @@ public class Evaluation {
 		{
 			precisionSum += val;
 		}	
-		double precisionAvg = precisionSum / precision.length;	
+		double precisionAvg = precisionSum / precision.size();	
 		return precisionAvg;
 	}
 	
