@@ -147,23 +147,16 @@ public class Evaluation {
 			{
 				precisionFoldSum += val;
 			}
-			
 			double precisionFoldAvg = precisionFoldSum / 5;
-			
 			precision[active] = precisionFoldAvg;
 			active++;
-			//will be in loop below
-			
-		}
-		
+		}	
 		double precisionSum = 0;
 		for(double val : precision)
 		{
 			precisionSum += val;
-		}
-		
-		double precisionAvg = precisionSum / precision.length;
-		
+		}	
+		double precisionAvg = precisionSum / precision.length;	
 		return precisionAvg;
 	}
 	
