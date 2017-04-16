@@ -123,24 +123,18 @@ public class Evaluation {
 				active++;
 				continue; //skip this user
 			}
-			
 			List<Artist> fold1 = new ArrayList<Artist>();
 			List<Artist> fold2 = new ArrayList<Artist>();
 			List<Artist> fold3 = new ArrayList<Artist>();
 			List<Artist> fold4 = new ArrayList<Artist>();
 			List<Artist> fold5 = new ArrayList<Artist>();
-			
 			List<List<Artist>> fold = new ArrayList<List<Artist>>();
-			
 			fold.add(fold1);
 			fold.add(fold2);
 			fold.add(fold3);
 			fold.add(fold4);
 			fold.add(fold5);
-			
 			generateFold(fold, activeUser);
-			
-			
 			double precisionFold[] = new double[5]; //LOOK AT FOLD SIZES
 			for(List<Artist> testFold : fold)
 			{
@@ -148,7 +142,6 @@ public class Evaluation {
 				precisionFold[fold.indexOf(testFold)] = evaluate(recommended, testFold);
 				
 			}
-
 			double precisionFoldSum = 0;
 			for(double val : precisionFold)
 			{
