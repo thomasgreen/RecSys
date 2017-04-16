@@ -77,12 +77,12 @@ public class Evaluation {
 
 		//BASELINE
 		Baseline baseline = new Baseline(10);
-		float baselineresult = runBaselineModel(baseline);
+		double baselineresult = runBaselineModel(baseline);
 		
 		/*		Artist Models	*/	
 		//testing the k value
 		int[] kTestValues = {1, 5, 10, 15, 20 ,25, 30, 45, 50};
-		float[] kTestResults = new float[10];
+		double[] kTestResults = new double[10];
 		for(int i = 0; i < kTestValues.length; i++)
 		{
 			AdvancedModel<Artist, Topartists> testEngine = new ArtistModel(10, kTestValues[i]);
@@ -91,7 +91,7 @@ public class Evaluation {
 		}
 		
 		System.out.println(baselineresult);
-		for(float val: kTestResults)
+		for(double val: kTestResults)
 		{
 			System.out.println(val);
 		}
@@ -104,7 +104,7 @@ public class Evaluation {
 		
 	}
 	
-	private float runBaselineModel(Baseline baseline)
+	private double runBaselineModel(Baseline baseline)
 	{
 		Topartists activeUser;
 		
@@ -119,12 +119,12 @@ public class Evaluation {
 		
 		int active = 0;
 		
-		float[] precision = new float[1000];
+		double[] precision = new double[1000];
 		while (active < test)
 		{
 			activeUser = tal.get(active); //set the active user
 			
-			if(totalPlays(activeUser) < 100) //if this user has listened to no music
+			if(totalPlays(activeUser) < 25) //if this user has listened to no music
 			{
 				active++;
 				continue; //skip this user
@@ -147,7 +147,7 @@ public class Evaluation {
 			generateFold(fold, activeUser);
 			
 			
-			float precisionFold[] = new float[5]; //LOOK AT FOLD SIZES
+			double precisionFold[] = new double[5]; //LOOK AT FOLD SIZES
 			for(List<Artist> testFold : fold)
 			{
 				
@@ -155,13 +155,13 @@ public class Evaluation {
 				
 			}
 
-			float precisionFoldSum = 0;
-			for(float val : precisionFold)
+			double precisionFoldSum = 0;
+			for(double val : precisionFold)
 			{
 				precisionFoldSum += val;
 			}
 			
-			float precisionFoldAvg = precisionFoldSum / 5;
+			double precisionFoldAvg = precisionFoldSum / 5;
 			
 			precision[active] = precisionFoldAvg;
 			active++;
@@ -169,13 +169,13 @@ public class Evaluation {
 			
 		}
 		
-		float precisionSum = 0;
-		for(float val : precision)
+		double precisionSum = 0;
+		for(double val : precision)
 		{
 			precisionSum += val;
 		}
 		
-		float precisionAvg = precisionSum / precision.length;
+		double precisionAvg = precisionSum / precision.length;
 		
 		return precisionAvg;
 	}
@@ -209,18 +209,18 @@ public class Evaluation {
 		
 	}
 
-	private <T extends Item, K extends TopItem<T>> float runModel(AdvancedModel<T, K> testEngine, List<K> userList)
+	private <T extends Item, K extends TopItem<T>> double runModel(AdvancedModel<T, K> testEngine, List<K> userList)
 	{
 		int active = 0;
 		
 		TopItem<T> activeUser;
 		
-		float[] precision = new float[1000];
+		double[] precision = new double[1000];
 		while (active < test)
 		{
 			activeUser = userList.get(active); //set the active user
 			
-			if(totalPlays(activeUser) < 100) //if this user has listened to no music
+			if(totalPlays(activeUser) < 100) //if this user has listened to not enough music.
 			{
 				active++;
 				continue; //skip this user
@@ -242,7 +242,7 @@ public class Evaluation {
 			
 			generateFold(fold, activeUser);
 			
-			float precisionFold[] = new float[5];
+			double precisionFold[] = new double[5];
 			for(List<T> testFold : fold)
 			{
 				//for each fold
@@ -276,13 +276,13 @@ public class Evaluation {
 				precisionFold[fold.indexOf(testFold)] = evaluate(recommended, test);
 			}
 
-			float precisionFoldSum = 0;
-			for(float val : precisionFold)
+			double precisionFoldSum = 0;
+			for(double val : precisionFold)
 			{
 				precisionFoldSum += val;
 			}
 			
-			float precisionFoldAvg = precisionFoldSum / 5;
+			double precisionFoldAvg = precisionFoldSum / 5;
 			
 			precision[active] = precisionFoldAvg;
 			active++;
@@ -290,13 +290,13 @@ public class Evaluation {
 			
 		}
 		
-		float precisionSum = 0;
-		for(float val : precision)
+		double precisionSum = 0;
+		for(double val : precision)
 		{
 			precisionSum += val;
 		}
 		
-		float precisionAvg = precisionSum / precision.length;
+		double precisionAvg = precisionSum / precision.length;
 		
 		return precisionAvg;
 	}
@@ -315,11 +315,11 @@ public class Evaluation {
 
 	
 	
-	private <T extends Item> float evaluate(Map<T, Integer> recommended, List<T> testItem) {
+	private <T extends Item> double evaluate(Map<T, Integer> recommended, List<T> testItem) {
 		//this is where precision and stuff are calculated maybe
-		float tp = 0;
+		double tp = 0;
 
-		float fp = 0;
+		double fp = 0;
 
 		List<Integer> actual = new ArrayList<Integer>();
 		List<Integer> predicted = new ArrayList<Integer>();
@@ -346,7 +346,7 @@ public class Evaluation {
 
 		
 
-		float precision = tp / (tp + fp);
+		double precision = tp / (tp + fp);
 		return precision;
 	}
 
