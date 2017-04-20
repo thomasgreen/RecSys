@@ -197,12 +197,6 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 		double left = sqrt((sumXSq) - (sumXallSq / n));
 		double right = sqrt((sumYSq) - (sumYallSq / n));
 		double r = top / (left * right);
-		
-		
-		if(Double.isNaN(r))
-		{
-			System.out.println("A");
-		}
 		return r;
 	}
 
