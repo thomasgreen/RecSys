@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class User {
 
-	// created using http://www.jsonschema2pojo.org/
 	@SerializedName("name")
 	@Expose
 	private String name;

@@ -40,7 +40,7 @@ public class TrackModel extends AdvancedModel<Track, Toptracks>{
 				}
 				int sim = similarity(training, toptracks);
 
-				if (totalPlays(toptracks) > 100) {
+				if (totalPlays(toptracks) > 500) {
 					if (!(toptracks.getAttr().getUser().equals(username))) {
 						testmap.put(toptracks.getAttr().getUser(), sim);
 					}
@@ -242,7 +242,6 @@ public class TrackModel extends AdvancedModel<Track, Toptracks>{
 
 	public int similarity(List<Track> training, Toptracks userB) {
 		int matchesCount = 0;
-
 		for (int i = 0; i < training.size(); i++) { //use every other data point TEST DATA TODO
 			boolean match = false;
 			for (int j = 0; j < userB.getItem().size(); j++) {
@@ -265,84 +264,56 @@ public class TrackModel extends AdvancedModel<Track, Toptracks>{
 		int n = 0; // number of data points = similarity;
 		n = entry.getValue(); // similarity of the 2 users
 		String userB = entry.getKey();
-
 		int userBentry = entryOfUser(userB);
-
 		// get values of common
-
-		List<Integer> x = new ArrayList<Integer>();// all x values, target users
-													// rating in common
-		List<Integer> y = new ArrayList<Integer>();// all x values, data users
-													// rating in common
-
-		for (int i = 0; i < training.size(); i++)// for all
-																	// the
-		// artists the
-		// first user
-		// likes
+		List<Integer> x = new ArrayList<Integer>();// all x values, target users rating in common
+		List<Integer> y = new ArrayList<Integer>();// all x values, data users ating in common
+		for (Track track1 : training)
 		{
-			String a = training.get(i).getName();
-			for (int j = 0; j < getTtl().get(userBentry).getItem().size(); j++) // and
-																				// all
-																				// the
-																				// artists
-																				// this
-																				// user
-																				// likes
+			String a = track1.getName();
+			for (Track track2 : getTtl().get(userBentry).getItem()) 
 			{
-
-				String b = getTtl().get(userBentry).getItem().get(j).getName();
-				if (a.equals(b))// if they match add the ranking to the x and y
-								// array
+				String b = track2.getName();
+				if (a.equals(b))// if they match add the ranking to the x and y array
 				{
-
-					x.add(Integer.parseInt(training.get(i).getPlaycount()));
-					y.add(Integer.parseInt(getTtl().get(userBentry).getItem().get(j).getPlaycount()));
+					x.add(Integer.parseInt(track1.getPlaycount()));
+					y.add(Integer.parseInt(track2.getPlaycount()));
 				}
 			}
-
 		}
-
-		List<Integer> xy = new ArrayList<Integer>();// sum of x * y for same
-													// song
+		List<Integer> xy = new ArrayList<Integer>();// sum of x * y for same artist
 
 		// calc xy values
 		for (int i = 0; i < n; i++) {
 			int xyval = x.get(i) * y.get(i);
-
 			xy.add(xyval);
-
 		}
-
-		int sumx = 0; // sum of x values
-		int sumy = 0; // sum of y values
-		int sumxy = 0; // sum of xy values
-
+		double sumx = 0; // sum of x values
+		double sumy = 0; // sum of y values
+		double sumxy = 0; // sum of xy values
 		for (int i = 0; i < n; i++) {
 			sumx = sumx + x.get(i);
 			sumy = sumy + y.get(i);
 			sumxy = sumxy + xy.get(i);
 		}
-
-		int sumXallSq = sumx * sumx; // (sum(x))^2
-		int sumYallSq = sumy * sumy; // (sum(y))^2
-
-		int sumXSq = 0; // sum (x^2)
-
-		int sumYSq = 0; // sum (y^2)
-
+		double sumXallSq = Math.pow(sumx, 2); // (sum(x))^2
+		double sumYallSq = Math.pow(sumy, 2); // (sum(y))^2
+		double sumXSq = 0; // sum (x^2)
+		double sumYSq = 0; // sum (y^2)
 		for (int i = 0; i < n; i++) {
-			sumXSq += x.get(i) * x.get(i);
-			sumYSq += y.get(i) * y.get(i);
+			sumXSq += Math.pow(x.get(i), 2);
+			sumYSq += Math.pow(y.get(i), 2);
 		}
-
 		double top = (sumxy - ((sumx * sumy) / n));
-
 		double left = sqrt((sumXSq) - (sumXallSq / n));
 		double right = sqrt((sumYSq) - (sumYallSq / n));
-
 		double r = top / (left * right);
-
+		
+		
+		if(Double.isNaN(r))
+		{
+			System.out.println("A");
+		}
 		return r;
 	}
 

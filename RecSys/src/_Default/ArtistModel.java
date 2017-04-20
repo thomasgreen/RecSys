@@ -26,7 +26,7 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 	}
 
 	@Override
-	public Map<Artist, Integer> recommend(List<Artist> trainingArtist, String username) {
+	public Map<Artist, Integer> recommend(List<Artist> training, String username) {
 
 			
 		Map<String, Integer> testmap = new HashMap<String, Integer>();
@@ -35,7 +35,7 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 			{
 				continue; //skip this user from the neighbours if it is the same user
 			}
-			int sim = similarity(trainingArtist, topartists);
+			int sim = similarity(training, topartists);
 	
 			if (totalPlays(topartists) > 500) {
 				if (!(topartists.getAttr().getUser().equals(username))) {
@@ -53,8 +53,8 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 				sorted.subList(0, neighbours));
 		Map<String, Double> pearsons = new HashMap<String, Double>();
 		for (int i = 0; i < nearest.size(); i++) {
-			if (nearest.get(i).getValue() > 0) {
-				pearsons.put(nearest.get(i).getKey(), pearson(nearest.get(i), trainingArtist));
+			if (nearest.get(i).getValue() > 1) {
+				pearsons.put(nearest.get(i).getKey(), pearson(nearest.get(i), training));
 			}
 		}
 		for (Entry<String, Double> entry : pearsons.entrySet()) {
@@ -71,7 +71,7 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 				// for each artist in the users top 100 add it to the list
 				// of
 				// nearest artists if not already in
-				if (isUnique(artist, nearestArtists) && isDuplicate(artist, trainingArtist)) {
+				if (isUnique(artist, nearestArtists) && isDuplicate(artist, training)) {
 					// is not in the list already, add it	
 					nearestArtists.add(artist);
 				}
@@ -80,7 +80,7 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 		Map<Artist, Integer> reclonglist = new HashMap<Artist, Integer>(); 
 		// hashmap to hold  artists and their predictive rating
 		for (Artist artist : nearestArtists) {
-			int rating = predictedrating(pearsons, artist, trainingArtist);
+			int rating = predictedrating(pearsons, artist, training);
 			reclonglist.put(artist, rating);
 		}
 		Map<Artist, Integer> sortedrec = new TreeMap<Artist, Integer>();
@@ -177,26 +177,32 @@ public class ArtistModel extends AdvancedModel<Artist, Topartists>{
 			int xyval = x.get(i) * y.get(i);
 			xy.add(xyval);
 		}
-		int sumx = 0; // sum of x values
-		int sumy = 0; // sum of y values
-		int sumxy = 0; // sum of xy values
+		double sumx = 0; // sum of x values
+		double sumy = 0; // sum of y values
+		double sumxy = 0; // sum of xy values
 		for (int i = 0; i < n; i++) {
 			sumx = sumx + x.get(i);
 			sumy = sumy + y.get(i);
 			sumxy = sumxy + xy.get(i);
 		}
-		int sumXallSq = sumx * sumx; // (sum(x))^2
-		int sumYallSq = sumy * sumy; // (sum(y))^2
-		int sumXSq = 0; // sum (x^2)
-		int sumYSq = 0; // sum (y^2)
+		double sumXallSq = Math.pow(sumx, 2); // (sum(x))^2
+		double sumYallSq = Math.pow(sumy, 2); // (sum(y))^2
+		double sumXSq = 0; // sum (x^2)
+		double sumYSq = 0; // sum (y^2)
 		for (int i = 0; i < n; i++) {
-			sumXSq += x.get(i) * x.get(i);
-			sumYSq += y.get(i) * y.get(i);
+			sumXSq += Math.pow(x.get(i), 2);
+			sumYSq += Math.pow(y.get(i), 2);
 		}
 		double top = (sumxy - ((sumx * sumy) / n));
 		double left = sqrt((sumXSq) - (sumXallSq / n));
 		double right = sqrt((sumYSq) - (sumYallSq / n));
 		double r = top / (left * right);
+		
+		
+		if(Double.isNaN(r))
+		{
+			System.out.println("A");
+		}
 		return r;
 	}
 

@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import com.google.gson.Gson;
 
 import FriendsPOJO.GetFriends;
-import UserPOJO.UserInfo;
 import artistsPOJO.GetTopArtists;
 import tracksPOJO.GetTopTracks;
 
@@ -28,25 +27,21 @@ import java.util.Scanner;
  *         appropriate class
  */
 public class DataCollection {
-
 	static String API_KEY = "78cc84967dc3a5fb577941e75bf7f8a9";
 	static Gson gson = new Gson();
-
 	public static void main(String[] args) throws IOException {
-
 		List<String> users = getUsersFromFile();
 
-//		for (int i = 0; i < 1000; i++) {
-//			getUserTopArtists(users.get(i));
-//			System.out.println(i);
-//		}
+		for (int i = 0; i < 1000; i++) {
+			getUserTopArtists(users.get(i));
+			System.out.println(i);
+		}
 		
 		for (int i = 0; i < 1000; i++) {
 			getUserTopTracks(users.get(i));
 			System.out.println(i);
 		}
 
-		
 		System.out.println("DONE");
 	}
 
@@ -90,10 +85,8 @@ public class DataCollection {
 					writer.write(userToAdd);
 					writer.flush();
 					writer.close();
-
 				}
 				freader.close();
-
 			}
 
 		} catch (NullPointerException e) { // if no friends are found
@@ -129,15 +122,10 @@ public class DataCollection {
 			}
 
 			FileWriter fw = new FileWriter(file, false);
-
 			currentdata = currentdata.substring(0, (currentdata.length() - 1));
-
 			currentdata += ","; // append comma
-
 			currentdata = currentdata + "" + gson.toJson(getartists.getTopartists());
-
 			currentdata += "]"; // close bracket
-
 			fw.write("");
 
 			fw.write(currentdata);
@@ -240,7 +228,6 @@ public class DataCollection {
 
 		return in.nextLine();
 
-		// in.close();
 
 	}
 

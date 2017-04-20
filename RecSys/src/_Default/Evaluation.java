@@ -69,39 +69,85 @@ public class Evaluation {
 		
 		
 		
-		test = 100;
+		test = 1000;
 	}
 	
+
 	public void run()
 	{
-
+		
+		int[] topNValues = {1, 5, 10, 15, 20 ,25, 30, 35, 40, 45, 50};
+		int[] kTestValues = {1, 5, 10, 15, 20 ,25, 30, 35, 40, 45, 50};
 		//BASELINE
 		Baseline baseline = new Baseline(10);
 		double baselineresult = runBaselineModel(baseline);
 		
-		/*		Artist Models		
+		//		Artist Models		
 		//testing the k value
-		int[] kTestValues = {1, 5, 10, 15, 20 ,25, 30, 45, 50};
-		double[] kTestResults = new double[10];
+		double[] kTestResultsArtist = new double[11];
+		for(int i = 0; i < kTestValues.length; i++)
+			{
+			AdvancedModel<Artist, Topartists> testEngine = new ArtistModel(10, kTestValues[i]);
+			kTestResultsArtist[i] = runModel(testEngine, tal);
+			} 
+		
+		
+		//topN		
+		
+		double[] topNResultsArtist = new double[11];
+		for(int i = 0; i < topNValues.length; i++)
+		{
+			AdvancedModel<Artist, Topartists> testEngine = new ArtistModel(topNValues[i], 15);
+			topNResultsArtist[i] = runModel(testEngine, tal);
+			
+		} 
+		
+		//		Track Models		
+		//testing the k value
+		double[] kTestResultsTrack = new double[11];
 		for(int i = 0; i < kTestValues.length; i++)
 		{
-			AdvancedModel<Artist, Topartists> testEngine = new ArtistModel(10, kTestValues[i]);
-			kTestResults[i] = runModel(testEngine, tal);
+			AdvancedModel<Track, Toptracks> testEngine = new TrackModel(10, kTestValues[i]);
+			kTestResultsTrack[i] = runModel(testEngine, ttl);
 			
-		} */
+		} 
 		
-		System.out.println(baselineresult);
-		/*for(double val: kTestResults)
+		
+		//topN		
+		double[] topNResultsTrack = new double[11];
+		for(int i = 0; i < topNValues.length; i++)
 		{
-			System.out.println(val);
+			AdvancedModel<Track, Toptracks> testEngine = new TrackModel(topNValues[i], 15);
+			topNResultsTrack[i] = runModel(testEngine, ttl);
+			
+		} 
+		
+		
+		System.out.println("Baseline Result: " + baselineresult);
+		System.out.println("Artist Model Results");
+		System.out.println("Varying K:");
+		for(int i = 0; i < kTestResultsArtist.length; i++)
+		{
+			System.out.println("K = " + kTestValues[i]+ "; Precision = " + kTestResultsArtist[i]);
 		}
-		
-		
-		/*		Track Models		*/
-		
-		
-		
-		
+		System.out.println("Artist Model Results");
+		System.out.println("Varying topN:");
+		for(int i = 0; i < topNResultsArtist.length; i++)
+		{
+			System.out.println("K = " + topNValues[i]+ "; Precision = " + topNResultsArtist[i]);
+		}
+		System.out.println("Track Model Results");
+		System.out.println("Varying K:");
+		for(int i = 0; i < kTestResultsTrack.length; i++)
+		{
+			System.out.println("K = " + kTestValues[i]+ "; Precision = " + kTestResultsTrack[i]);
+		}
+		System.out.println("Track Model Results");
+		System.out.println("Varying topN:");
+		for(int i = 0; i < topNResultsTrack.length; i++)
+		{
+			System.out.println("K = " + topNValues[i]+ "; Precision = " + topNResultsTrack[i]);
+		}
 	}
 	
 	private double runBaselineModel(Baseline baseline)
@@ -161,7 +207,6 @@ public class Evaluation {
 	}
 	
 	private <T extends Item> void generateFold(List<List<T>> fold, TopItem<T> activeUser) {
-		// TODO Auto-generated method stub
 		for(int i = 0; i < activeUser.getItem().size() / 5; i++)
 		{
 			fold.get(0).add(activeUser.getItem().get(i)); //add all odd data to training list
@@ -193,7 +238,7 @@ public class Evaluation {
 	{
 		int active = 0;
 		TopItem<T> activeUser;
-		double[] precision = new double[1000];
+		List<Double> precision = new ArrayList<Double>();
 		while (active < test)
 		{
 			activeUser = userList.get(active); //set the active user
@@ -239,8 +284,6 @@ public class Evaluation {
 					}
 				}
 				
-				
-				
 				//make follow code and generate average for each fold
 				Map<T, Integer> recommended = new HashMap<T, Integer>();
 				String username = activeUser.getAttr().getUser();
@@ -260,9 +303,8 @@ public class Evaluation {
 			
 			double precisionFoldAvg = precisionFoldSum / 5;
 			
-			precision[active] = precisionFoldAvg;
+			precision.add(precisionFoldAvg);
 			active++;
-			//will be in loop below
 			
 		}
 		
@@ -272,7 +314,7 @@ public class Evaluation {
 			precisionSum += val;
 		}
 		
-		double precisionAvg = precisionSum / precision.length;
+		double precisionAvg = precisionSum / precision.size();
 		
 		return precisionAvg;
 	}
@@ -285,8 +327,6 @@ public class Evaluation {
 		{
 			list.add(foldArtist);
 		}
-		
-		
 	}
 
 	
